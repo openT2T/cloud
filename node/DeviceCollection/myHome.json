@@ -1,0 +1,13 @@
+{
+    "LivingRoom": {
+        "Light": {
+            "deviceId": "light1"
+        },
+        "ConsoleLight": {
+            "deviceId": "consoleLight1"
+        },
+        "SensorTag": {
+            "deviceId": "sensorTag1"
+        }
+    }
+}

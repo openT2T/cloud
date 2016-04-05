@@ -1,0 +1,32 @@
+[
+    {
+        "deviceId": "light1",
+        "deviceType": "org.openT2T.sample.superPopular.lamp/Test Light",
+        "initDevice": {
+            "name": "WINK",
+            "url": "<url of the service>",
+            "accessToken": "<Access Token>",
+            "refreshToken": "<Refresh Token>"
+        }
+    },
+       {
+        "deviceId": "consoleLight1",
+        "deviceType": "org.openT2T.sample.superPopular.lamp/Test Light",
+        "initDevice": {
+            "name": "WINK",
+            "url": "<url of the service>",
+            "accessToken": "<Access Token>",
+            "refreshToken": "<Refresh Token>"
+        }
+    },
+       {
+        "deviceId": "sensorTag1",
+        "deviceType": "org.openT2T.sample.superPopular.temperatureSensor/Test Thermostat",
+        "initDevice": {
+            "name": "Test Thermostat",
+            "url": "<url of the service>",
+            "accessToken": "<Access Token>",
+            "refreshToken": "<Refresh Token>"
+        }
+    }
+]

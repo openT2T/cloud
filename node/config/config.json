@@ -1,0 +1,6 @@
+{
+    "pullInterval": 10,
+    "deviceRegistryUrl": "https://github.com/openT2T/translators.git",
+    "deviceRegistryLocal": "repo",
+    "repoDir": "repo"
+}
