@@ -4,7 +4,7 @@ var opent2t = require("./opent2t");
  * Once the ruleEngine is initialized, it start running a polling loop
  * and execute the rules defined in the rules/ directory. 
  * Rules use APIs available in the thingTranslator file that can be used
- * to retrieve the state of a device. For instance, a Thermostat exposes
+ * to retrieve the state of a device. For instance, a Temperature Sensor exposes
  * a method getCurrentTemperature that can be used to retrieve the last 
  * temperature registered by the sensor.
  * 

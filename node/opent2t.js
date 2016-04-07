@@ -26,10 +26,8 @@ module.exports = {
         //check if config file exists
         if (fs.existsSync(configFile)) {
             settings = require(configFile);
-            // clone the translators repo
-            // TODO: this can be removed, translators is going to be a public repo
-            git.setGithubToken(process.env.GITHUBTOKEN);
 
+            // clone the translators repo
             git.clone(settings.repoDir, settings.deviceRegistryUrl, function() {
                 initCompletedCallback();
             });
