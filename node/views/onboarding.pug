@@ -1,0 +1,18 @@
+extends layout
+
+block content
+
+  form(method="post", action="")
+    fieldset
+      legend Sign in to Wink
+
+      each item in inputNeeded
+        p
+          label(for=item.name) #{item.name}:
+            input(type=item.type name=item.name)
+              //- .tip.
+              //-   #{item.message}
+      p.buttons
+        input(type="submit", value="Sign in")
+
+  p Don't have a Wink account? You can create one using the Wink app. 
