@@ -1,112 +1,439 @@
 FORMAT: 1A
-HOST: http://polls.apiblueprint.org/
+HOST: http://example.com/api/v1
 
-# Polls API
+# OpenT2T API Server
 
-Polls is a simple API allowing consumers to view polls and vote in them.
+This documents a simple REST API hosting the [OpenT2T library](https://github.com/opent2t/opent2t). It can be called by other non-node services
+that cannot host OpenT2T directly, or simply deployed as part of a [Microservices Architecture](http://microservices.io/).
 
-## Questions Collection [/questions]
+The purpose of this document is to facilitate anyone who wants to create a service using OpenT2T. Everything you need to know about OpenT2T is 
+at http://opent2t.io.
 
-### List All Questions [GET]
+# Group Anonymous Actions
+The APIs in this section are anonymous, i.e. the caller does not need to present any credentials or
+`Authorization` header. 
+
+## Hubs Collection [/hubs]
+
+### List All Hubs Supported by OpenT2T [GET]
+May be used by the caller to render UX allowing the user to initiate setup for any hubs that they own.
+
+The *onboarding* property of each hub in the response references the specific onboarding type required to set up the hub. Currently,
+only [OAuth2](https://tools.ietf.org/html/rfc6749) is supported. For this onboarding type, the caller should take the user to the `auth_uri` 
+(e.g. in a hosted browser in the case of an app caller) and then start monitoring all redirects. When the caller
+detects a redirect to the `redirect_uri` it should note the entire URI (including any fragment attached to it)
+and POST it to the `/hubs/{hub_id}/connect` Action (where `{hub_id}` is the ID of the Hub the user selected).
+
+Some hubs supported by OpenT2T, e.g. Wink, only support the OAuth 2 Resource Owner Password Credentials flow. In these
+cases, we assume that this service also proxies the auth to such hubs and hosts the Sign-In forms
+where the user enters the username and password. The auth_uri for such hubs points that these hosted Sign-In forms, and 
+in this way clients (e.g. phone apps) can deal with all hubs exactly the same way regardless of what OAuth flavor is supported.
+
+The hosted Sign-in forms are documented under the `/hubs/{hub_id}/signInForm` Action (where `{hub_id}` is the ID of the Hub the user selected).
 
 + Response 200 (application/json)
 
         [
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+                "id": 1,
+                "name": "Nest",
+                "icon": "https://example.com/images/nest.png",
+                "onboarding": {
+                    "type" : "OAuth2",
                     {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
+                        "auth_uri": "https://home.nest.com/login/oauth2?client_id=ABCDXYZ&state=1234567",
+                        "redirect_uri": "https://www.example.com/auth_redirect"
                     }
-                ]
-            }
+                }
+            },
+            {
+                "id": 2,
+                "name": "Wink",
+                "icon": "https://example.com/images/wink.png",
+                "onboarding": {
+                    "type" : "OAuth2",
+                    {
+                        "auth_uri": "/hubs/2/signInForm",
+                        "redirect_uri": "https://www.example.com/auth_redirect"
+                    }
+                }
+            },
         ]
 
-### Create a New Question [POST]
+# Group User Authorized Actions
+The APIs in this section require authorization, i.e. the caller needs to provide a valid
+`Authorization` header. This document does not specify any particular authorization format, and that
+is up to the implementation. The only requirement is that this API recognizes the Authorization header
+as valid, and it is associated with a particular user (e.g. a user Bearer token).
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
+It is expected that internally this service is configured with any secrets to communicate with other services, e.g. client secrets
+to talk to services like Wink, Nest, etc. These secrets are never exposed out of the REST API, but are internally used to securely
+communicate with other services as needed.
 
-+ Request (application/json)
+It is also expected that internally this service has a data store where it stashes user data, e.g. service
+specific credentials for each user as well as other data like device IDs etc.
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+## Hosted Sign-In Forms [/hubs/{hub_id}/signInForm]
 
-+ Response 201 (application/json)
+### Display a Hosted Sign-In Form [GET]
+Displays a hosted sign-in form for hubs that support the OAuth 2 Resource Owner Password Credentials Flow. These forms
+are used to make such hubs equivalent to others that support the full OAuth 2 flow, as far as callers of this API
+are concerned.
+
+This form is sent as the `auth_uri` for hubs that support the OAuth 2 Resource Owner Password Credentials Flow.
+
++ Parameters
+    + hub_id (number) - ID of the Hub
+    
++ Request (text/html)
 
     + Headers
 
-            Location: /questions/2
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
++ Response 200 (text/html)
+
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width">
+                <title>Sign in to Wink</title>
+            </head>
+            <body>
+                <form method="post" action="">
+                    <fieldset>
+                        <legend>Sign in to Wink</legend>
+                        <p>
+                            <label for="user[email]">
+                                Email:
+                                <input type="email" name="user[email]">
+                                <div class="tip">
+                                    Enter the email address you use to sign in to WINK, e.g. <em>somebody@example.com</em>.
+                                </div>
+                            </label>
+                        </p>
+                        <p>
+                            <label for="user[name]">
+                                Password:
+                                <input type="password" name="user[password]">
+                            </label>
+                        </p>
+                    </fieldset>
+                    <p class="buttons"><input type="submit" value="Sign in"></p>
+                </form>
+                <p>
+                    Don't have a Wink account? You can create one using the Wink app.
+                </p>
+            </body>
+        </html>
+
+### Process a Hosted Sign-In Form [POST]
+The hosted Sign-In forms for hubs that support the OAuth 2 Resource Owner Password Credentials Flow post the 
+contents of the sign-in form to this action.
+
+Internally, this API gets an access token for this user using the provided credentials. This service is
+internally configured with any secrets required to talk to complete the OAuth flow.
+
+Upon success, there is a redirect to the `redirect_uri ` for this hub, so that any client monitoring for that
+URI is notified that sign-in is complete.
+
++ Request
+
+    + Headers
+
+            Content-Type: application/x-www-form-urlencoded
+            Content-Length: 45
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+    
+    + Body
+        
+            user[email]:johndoe@example.com
+            user[password]:chocolate
+                
++ Response 303
+
+    + Headers
+            
+            Location: https://www.example.com/auth_redirect
+
+## Hubs [/hubs/{hub_id}]
+
++ Parameters
+    + hub_id (number) - ID of the Hub
+
+### Connect to a Hub [POST /hubs/{hub_id}/connect]
+After the client completes onboarding, per the `onboard` parameter of the user-selected entry in the `/hubs`
+response, the next step is to connect to the hub with the result of onboarding.
+
+What is sent to this action is different per onboarding type. For now, with only OAuth 2 supported, it is expected
+that the client will post the entire `redirect_uri` (including any fragment) received after onboarding to this endpoint.
+Internally, this API will use the information in the `redirect_uri` to get the access token for this hub, and save it in
+its internal database. There are two possible ways this is done.
+
+1. **Full Oauth 2 Flow:** The `redirect_uri` sent to this action contains a code fragment that can be exchanged for the
+access token for this hub, and then saved in its internal database. This service is internally configured with any secrets
+required to talk to complete the OAuth flow.
+
+2. **OAuth 2 Resource Owner Password Credentials Flow:** The `redirect_uri` sent to this action does not contain any code
+fragment and this action is bascially a no-op, e.g. in the case of Wink. In this case, the redirect_uri was generated
+by the Hosted Sign-In form which has already stored and saved the access token for this user for this service and the client
+is simply following the same flow it follows for other OAuth 2 onboarding types.
+    
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
 
     + Body
 
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+               "type" : "OAuth2",
+                {
+                    "redirect_uri": "https://www.example.com/auth_redirect#code=abcdef1234567890"
+                }
+            }
+
++ Response 200 (application/json)
+        
++ Response 401
+
+### List All Devices Connected To Hub [GET /hubs/{hub_id}/devices]
+
+Returns the different devices connected to the hub, by directly querying the hub. May be used by the caller to
+render UX or to cache the device list locally.
+
+Internally, this service also caches this list of devices and assigns a user-unique ID for this device (across hubs).
+These user-unique device IDs can be used in other API calls to interact with any device in this list without the need to
+scope the call with the hub ID.
+
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
++ Response 200 (application/json)
+
+        [
+            {
+                "id": "2_1",
+                "name": "Hallway Thermostat",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Thermostat",
+                    "translator": "Wink Thermostat"
+                },
+                "icon": "https://example.com/images/thermostat.png",
+            },
+            {
+                "id": "2_2",
+                "name": "Patio Light",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "translator": "Wink Light"
+                },
+                "icon": "https://example.com/images/light.png"
+            }
+        ]
+
+## Devices  [/devices]
+
+### List All Devices [GET]
+Returns all devices for a user. May be used by the caller to
+render UX or to cache the device list locally.
+
+Internally, this service also caches this list of devices and assigns a user-unique ID for this device (across hubs).
+These user-unique device IDs can be used in other API calls to interact with any device in this list without the need to
+scope the call with the hub ID.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
++ Response 200 (application/json)
+
+        [
+            {
+                "id": "2_1",
+                "name": "Hallway Thermostat",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Thermostat",
+                    "translator": "Wink Thermostat"
+                },
+                "icon": "https://example.com/images/thermostat.png",
+            },
+            {
+                "id": "2_2",
+                "name": "Patio Light",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "translator": "Wink Light"
+                },
+                "icon": "https://example.com/images/light.png"
+            }
+        ]
+
+## Device Groups  [/groups]
+Devices can be grouped together, and a group can be treated like a composite device in some
+cases (e.g. turning off a group of lights all together).
+
+### List All Device Groups for User [GET]
+May be used by the caller to render UX or to cache the group list locally.
+
+Does not include details about the devices in each group (since this could be a large
+response). If caller is interested, they can call `GET /groups/{group_id}` to get
+complete group details, including devices in the group.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
++ Response 200 (application/json)
+
+        [
+            {
+                "id": "123",
+                "name": "Downstairs Lights",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                },
+                "icon": "https://example.com/images/lights.png",
+            },
+            {
+                "id": "456"
+                "name": "Upstairs Lights",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                },
+                "icon": "https://example.com/images/lights.png",
+            }
+        ]
+        
+### Create a New Device Group for User [POST]
+Devices can be added or removed from this group after creation via:
+1. Add a device: `PUT /groups/{group_id}/{device_id}`
+2. Remove a device: `DELETE /groups/{group_id}/{device_id}`
+
+This action takes a JSON payload as part of the request body.
+Response then return specific header and body.
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
+    + Body
+    
+            {
+                "name": "Downstairs Lights",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                },
+                "icon": "https://example.com/images/lights.png"
+            }
+    
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /groups/123
+
+    + Body
+    
+            {
+                "id": "123",
+                "created_at": "2016-08-02T09:30:32.120Z",
+                "name": "Downstairs Lights",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                },
+                "icon": "https://example.com/images/lights.png"
+            }
+
+### Device Group Details [GET /groups/{group_id}]
+Queries the contents of a group, including devices in the group.
+
++ Parameters
+
+    + group_id (number) - ID of the Device Group
+
++ Response 200 (application/json)
+
+            {
+                "id": "123",
+                "created_at": "2016-08-02T09:30:32.120Z",
+                "name": "Downstairs Lights",
+                "openT2T": {
+                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                },
+                "icon": "https://example.com/images/lights.png",
+                "members": [
                     {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
+                        "id": "2_2"
+                        "name": "Living Room Light",
+                        "openT2T": {
+                            "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                            "translator": "Wink Light"
+                        },
+                        "icon": "https://example.com/images/light.png"
+                    },
+                    {
+                        "id": "2_3"
+                        "name": "Living Room Light",
+                        "openT2T": {
+                            "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                            "translator": "Philips Hue Light"
+                        },
+                        "icon": "https://example.com/images/light.png"
                     }
                 ]
             }
             
-### Question Details [GET /questions/{question_id}]
+### Add Device to a Group [PUT /groups/{group_id}/{device_id}]
+
+> **Note:** At this time, we only support homogenous groups, e.g. you can only have
+  a group of lights or a group of window blinds -- you cannot mix and match.
 
 + Parameters
-    + question_id (number) - ID of the Question in the form of an integer
 
-+ Response 200 (application/json)
+    + group_id (number) - ID of the Device Group
+    + device_id (number) - ID of the Device to add to the group
+    
++ Response 200
+
++ Response 404 (application/json)
 
         {
-            "question": "Favourite programming language?",
-            "published_at": "2014-11-11T08:40:51.620Z",
-            "url": "/questions/1",
-            "choices": [
-                {
-                    "choice": "Swift",
-                    "url": "/questions/1/choices/1",
-                    "votes": 2048
-                }, {
-                    "choice": "Python",
-                    "url": "/questions/1/choices/2",
-                    "votes": 1024
-                }, {
-                    "choice": "Objective-C",
-                    "url": "/questions/1/choices/3",
-                    "votes": 512
-                }, {
-                    "choice": "Ruby",
-                    "url": "/questions/1/choices/4",
-                    "votes": 256
-                }
-            ]
+            "message" : "The group or device ID specified was not found"
+        }
+
++ Response 400 (application/json)
+
+        {
+            "message" : "The specified device could not be associated with the specified group"
+        }
+
+### Remove Device from a Group [DELETE /groups/{group_id}/{device_id}]
+
+Note that the device is simply disassociated from the group. It is not
+removed from the devices collection for this user, nor from the hub (if any)
+that the device is associated with.
+
++ Parameters
+
+    + group_id (number) - ID of the Device Group
+    + device_id (number) - ID of the Device to add to the group
+    
++ Response 200
+
++ Response 404 (application/json)
+
+        {
+            "message" : "The group or device ID specified was not found"
         }
