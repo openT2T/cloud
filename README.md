@@ -1,7 +1,7 @@
 # OpenT2T API Server Sample
 A sample server that can be can be used to interact with similar devices using a common schema.
 
-This is NOT intended for any sort of real use since it does not implement any real auth or persistent storage.
+> **Important:** This is just a code sample and NOT intended for any sort of real use since it does not implement any real auth or persistent storage.
 
 The API for this sample is documented at: http://docs.opent2t.apiary.io
 
