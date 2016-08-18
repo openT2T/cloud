@@ -1,0 +1,21 @@
+extends layout
+
+block content
+
+  form(method="post", action="")
+    fieldset
+      legend Sign in to Wink
+      input(type="hidden", name="user[userId]", value=userId)
+      p
+        label(for="user[email]") Email:
+          input(type="email", name="user[email]")
+          .tip.
+            Enter the email address you use to sign in to WINK, e.g. <em>somebody@example.com</em>.
+      p
+        label(for="user[name]") Password:
+          input(type="password", name="user[password]")
+    p.buttons
+      input(type="submit", value="Sign in")
+
+  p Don't have a Wink account? You can create one using the Wink app. 
+  p UID: #{userId}
