@@ -73,9 +73,9 @@ communicate with other services as needed.
 It is also expected that internally this service has a data store where it stashes user data, e.g. service
 specific credentials for each user as well as other data like device IDs etc.
 
-## Hosted Sign-In Forms [/hubs/{hub_id}/signInForm]
+## Hubs [/hubs/{hub_id}]
 
-### Display a Hosted Sign-In Form [GET]
+### Display a Hosted Sign-In Form [GET /hubs/{hub_id}/signInForm]
 Displays a hosted sign-in form for hubs that support the OAuth 2 Resource Owner Password Credentials Flow. These forms
 are used to make such hubs equivalent to others that support the full OAuth 2 flow, as far as callers of this API
 are concerned.
@@ -83,8 +83,9 @@ are concerned.
 This form is sent as the `auth_uri` for hubs that support the OAuth 2 Resource Owner Password Credentials Flow.
 
 + Parameters
+
     + hub_id (number) - ID of the Hub
-    
+
 + Request (text/html)
 
     + Headers
@@ -128,7 +129,7 @@ This form is sent as the `auth_uri` for hubs that support the OAuth 2 Resource O
             </body>
         </html>
 
-### Process a Hosted Sign-In Form [POST]
+### Process a Hosted Sign-In Form [POST /hubs/{hub_id}/signInForm]
 The hosted Sign-In forms for hubs that support the OAuth 2 Resource Owner Password Credentials Flow post the 
 contents of the sign-in form to this action.
 
@@ -138,11 +139,14 @@ internally configured with any secrets required to talk to complete the OAuth fl
 Upon success, there is a redirect to the `redirect_uri ` for this hub, so that any client monitoring for that
 URI is notified that sign-in is complete.
 
-+ Request
++ Parameters
+
+    + hub_id (number) - ID of the Hub
+
++ Request (application/x-www-form-urlencoded)
 
     + Headers
 
-            Content-Type: application/x-www-form-urlencoded
             Content-Length: 45
             Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
     
@@ -156,11 +160,6 @@ URI is notified that sign-in is complete.
     + Headers
             
             Location: https://www.example.com/auth_redirect
-
-## Hubs [/hubs/{hub_id}]
-
-+ Parameters
-    + hub_id (number) - ID of the Hub
 
 ### Connect to a Hub [POST /hubs/{hub_id}/connect]
 After the client completes onboarding, per the `onboard` parameter of the user-selected entry in the `/hubs`
@@ -179,11 +178,16 @@ required to talk to complete the OAuth flow.
 fragment and this action is bascially a no-op, e.g. in the case of Wink. In this case, the redirect_uri was generated
 by the Hosted Sign-In form which has already stored and saved the access token for this user for this service and the client
 is simply following the same flow it follows for other OAuth 2 onboarding types.
-    
+
++ Parameters
+
+    + hub_id (number) - ID of the Hub
+
 + Request (application/json)
 
     + Headers
 
+            Content-Length: 45
             Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
 
     + Body
@@ -208,6 +212,10 @@ Internally, this service also caches this list of devices and assigns a user-uni
 These user-unique device IDs can be used in other API calls to interact with any device in this list without the need to
 scope the call with the hub ID.
 
++ Parameters
+
+    + hub_id (number) - ID of the Hub
+
 + Request (application/json)
 
     + Headers
@@ -221,8 +229,8 @@ scope the call with the hub ID.
                 "id": "2_1",
                 "name": "Hallway Thermostat",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Thermostat",
-                    "translator": "Wink Thermostat"
+                    "schema": "org.opent2t.sample.thermostat.superpopular",
+                    "translator": "com.wink.thermostat"
                 },
                 "icon": "https://example.com/images/thermostat.png",
             },
@@ -230,12 +238,49 @@ scope the call with the hub ID.
                 "id": "2_2",
                 "name": "Patio Light",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
-                    "translator": "Wink Light"
+                    "schema": "org.opent2t.sample.lamp.superpopular",
+                    "translator": "com.wink.lightbulb"
                 },
                 "icon": "https://example.com/images/light.png"
             }
         ]
+
+### Get Details for Device Connected To Hub [GET /hubs/{hub_id}/devices/{device_id}]
+
+Returns details for a device, by directly querying the hub. May be used by the caller to
+render UX or to cache the device state locally. This includes current state for the device
+which is not returned when listing devices.
+
+Internally, this service also caches this device state.
+
+Note that these user-unique device IDs can be used in other API calls to interact with any device
+without the need to scope the call with the hub ID.
+
+By definition, this API call is identical to `GET /devices/{device_id}` so please refer to
+documentation for that API for more information.
+
++ Parameters
+
+    + hub_id (number) - ID of the Hub
+
++ Response 200
+
+### Update Details for Device Connected To Hub [POST /hubs/{hub_id}/devices/{device_id}]
+
+Updates details for a device, by directly updating via the hub. May be used by the caller to
+respond to user requests to interact with the device.
+
+Note that these user-unique device IDs can be used in other API calls to interact with any device
+without the need to scope the call with the hub ID.
+
+By definition, this API call is identical to `POST /devices/{device_id}` so please refer to
+documentation for that API for more information.
+
++ Parameters
+
+    + hub_id (number) - ID of the Hub
+
++ Response 200
 
 ## Devices  [/devices]
 
@@ -260,8 +305,8 @@ scope the call with the hub ID.
                 "id": "2_1",
                 "name": "Hallway Thermostat",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Thermostat",
-                    "translator": "Wink Thermostat"
+                    "schema": "org.opent2t.sample.thermostat.superpopular",
+                    "translator": "com.wink.thermostat"
                 },
                 "icon": "https://example.com/images/thermostat.png",
             },
@@ -269,12 +314,101 @@ scope the call with the hub ID.
                 "id": "2_2",
                 "name": "Patio Light",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
-                    "translator": "Wink Light"
+                    "schema": "org.opent2t.sample.lamp.superpopular",
+                    "translator": "com.wink.lightbulb"
                 },
                 "icon": "https://example.com/images/light.png"
             }
         ]
+
+### Get Details for Device [GET /devices/{device_id}]
+
+Returns details for a device by directly querying it (via a hub in the case this is a
+hub-connected device). May be used by the caller to render UX or to cache the device state locally. 
+This includes current state for the device which is not returned when listing devices.
+
+Internally, this service also caches this device state.
+
+Note that these are user-unique device IDs and can therefore be used in API calls like
+this one to interact with any device (including hub connected devices) without the need to scope
+the call with the hub ID.
+
++ Parameters
+
+    + device_id (string) - ID of the device
+    
++ Request (application/json)
+
+    + Headers
+    
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
++ Response 200 (application/json)
+
+        {
+            "id": "2_1",
+            "name": "Hallway Thermostat",
+            "openT2T": {
+                "schema": "org.opent2t.sample.thermostat.superpopular",
+                "translator": "com.wink.thermostat"
+            },
+            "icon": "https://example.com/images/thermostat.png",
+            "state": {
+                "ambientTemperature": "27",
+                "targetTemperature": "26.5",
+                "targetTemperatureHigh": "27.5",
+                "targetTemperatureLow": "26"
+            }
+        }
+
+### Update Details for Device [POST /devices/{device_id}]
+Updates details for a device, by directly directly updating it (via a hub in the 
+case this is a hub-connected device). May be used by the caller to
+respond to user requests to interact with the device.
+
+Note that these are user-unique device IDs and can therefore be used in API calls like
+this one to interact with any device (including hub connected devices) without the need to scope
+the call with the hub ID.
+
+This API responds with the updated device details.
+
++ Parameters
+
+    + device_id (string) - ID of the device
+    
++ Request (application/json)
+
+    + Headers
+    
+            Content-Length: 45
+            Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
+            
+    + Body
+
+            {
+                "ambientTemperature": "27",
+                "targetTemperature": "26.5",
+                "targetTemperatureHigh": "27.5",
+                "targetTemperatureLow": "26"
+            }
+            
++ Response 200 (application/json)
+
+        {
+            "id": "2_1",
+            "name": "Hallway Thermostat",
+            "openT2T": {
+                "schema": "org.opent2t.sample.thermostat.superpopular",
+                "translator": "com.wink.thermostat"
+            },
+            "icon": "https://example.com/images/thermostat.png",
+            "state": {
+                "ambientTemperature": "27",
+                "targetTemperature": "26.5",
+                "targetTemperatureHigh": "27.5",
+                "targetTemperatureLow": "26"
+            }
+        }
 
 ## Device Groups  [/groups]
 Devices can be grouped together, and a group can be treated like a composite device in some
@@ -300,7 +434,7 @@ complete group details, including devices in the group.
                 "id": "123",
                 "name": "Downstairs Lights",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "schema": "org.opent2t.sample.lamp.superpopular",
                 },
                 "icon": "https://example.com/images/lights.png",
             },
@@ -308,7 +442,7 @@ complete group details, including devices in the group.
                 "id": "456"
                 "name": "Upstairs Lights",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "schema": "org.opent2t.sample.lamp.superpopular",
                 },
                 "icon": "https://example.com/images/lights.png",
             }
@@ -326,6 +460,7 @@ Response then return specific header and body.
 
     + Headers
 
+            Content-Length: 45
             Authorization: Bearer USER_OPENT2T_API_BEARER_TOKEN
             
     + Body
@@ -333,7 +468,7 @@ Response then return specific header and body.
             {
                 "name": "Downstairs Lights",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "schema": "org.opent2t.sample.superpopular.lamp",
                 },
                 "icon": "https://example.com/images/lights.png"
             }
@@ -351,7 +486,7 @@ Response then return specific header and body.
                 "created_at": "2016-08-02T09:30:32.120Z",
                 "name": "Downstairs Lights",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "schema": "org.opent2t.sample.superpopular.lamp",
                 },
                 "icon": "https://example.com/images/lights.png"
             }
@@ -370,7 +505,7 @@ Queries the contents of a group, including devices in the group.
                 "created_at": "2016-08-02T09:30:32.120Z",
                 "name": "Downstairs Lights",
                 "openT2T": {
-                    "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
+                    "schema": "org.opent2t.sample.lamp.superpopular",
                 },
                 "icon": "https://example.com/images/lights.png",
                 "members": [
@@ -378,8 +513,8 @@ Queries the contents of a group, including devices in the group.
                         "id": "2_2"
                         "name": "Living Room Light",
                         "openT2T": {
-                            "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
-                            "translator": "Wink Light"
+                            "schema": "org.opent2t.sample.lamp.superpopular",
+                            "translator": "com.wink.lightbulb"
                         },
                         "icon": "https://example.com/images/light.png"
                     },
@@ -387,8 +522,8 @@ Queries the contents of a group, including devices in the group.
                         "id": "2_3"
                         "name": "Living Room Light",
                         "openT2T": {
-                            "schema": "org.OpenT2T.Sample.SuperPopular.Lamp",
-                            "translator": "Philips Hue Light"
+                            "schema": "org.opent2t.sample.lamp.superpopular",
+                            "translator": "com.philips.hub.bulb"
                         },
                         "icon": "https://example.com/images/light.png"
                     }
