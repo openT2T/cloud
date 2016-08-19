@@ -6,7 +6,10 @@ deviceRouter.get("/", function (req, res) {
     var user = req.userInfo;
     
     var devices = config.getUserDeviceMap(user).devices;
-    res.send(devices);  
+    var converted = config.convertInternalDeviceArrayToClientArray(devices);
+    console.log(devices);
+    console.log(converted);
+    res.send(converted);
 });
 
 // return devices for this specific hub
@@ -15,11 +18,8 @@ deviceRouter.get("/:deviceId", function (req, res) {
     var deviceId = req.params.deviceId;
 
     var device = config.getUserDevice(user, deviceId);
-
-    console.log("device");
-    console.log(device);
-
-    res.send(device);
+    var converted = config.convertInternalDeviceToClientDevice(device);
+    res.send(converted);
 });
 
 

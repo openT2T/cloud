@@ -30,7 +30,7 @@ var hubs = {
                 client_secret: "test",
             },
             onboarding: 'opent2t-nest-onboarding',
-            //auth_uri: "https://home.nest.com/login/oauth2?client_id=dc528425-3551-400c-9718-c0b06a336e90&state=" + randomstring.generate(),
+            hub: 'opent2t-nest-hub',
             auth_uri: "https://home.nest.com/login/oauth2?client_id=dc528425-3551-400c-9718-c0b06a336e90&state=",
             redirect_uri: "http://localhost:828/hubs/nest/auth_redirect"
         }
@@ -44,7 +44,7 @@ var noAuthUrls = [ '/', '/hubs' ];
 
 function getUserFromRequest(req) {
     var authToken = req.headers['userinfo'];
-    console.log(authToken);
+    //console.log(authToken);
     return getUserFromToken(authToken);
 }
 
@@ -73,9 +73,9 @@ function getUserDeviceMap(user) {
         userDeviceMapping[user] = userDeviceMap;
     }
 
-    console.log("----------------------- getUserDeviceMap");
-    console.log(userDeviceMapping[user]);
-    console.log("-----------------------");
+    // console.log("----------------------- getUserDeviceMap");
+    // console.log(userDeviceMapping[user]);
+    // console.log("-----------------------");
 
     return userDeviceMapping[user];
 }
@@ -92,9 +92,9 @@ function getUserHubDevice(user, hubId) {
         };
     }
 
-    console.log("----------------------- getUserHubDevice");
-    console.log(userDeviceMap[hubId]);
-    console.log("-----------------------");
+    // console.log("----------------------- getUserHubDevice");
+    // console.log(userDeviceMap[hubId]);
+    // console.log("-----------------------");
 
     return userDeviceMap[hubId];
 }
@@ -102,9 +102,9 @@ function getUserHubDevice(user, hubId) {
 function getUserDevice(user, deviceId) {
     var userDeviceMap = getUserDeviceMap(user);
     
-    console.log("----------------------- getUserDevice");
-    console.log(userDeviceMap);
-    console.log("-----------------------");
+    // console.log("----------------------- getUserDevice");
+    // console.log(userDeviceMap);
+    // console.log("-----------------------");
 
     for (var i = 0; i < userDeviceMap.devices.length; i++) {
         var d = userDeviceMap.devices[i];
@@ -128,9 +128,9 @@ function addUserDevice(user, device) {
 }
 
 function addUserDeviceToDevice(user, device, parentDeviceId) {
-    console.log("------------------------ addUserDeviceToDevice")
-    console.log("user          : " + user);
-    console.log("parentDeviceId: " + parentDeviceId);
+    // console.log("------------------------ addUserDeviceToDevice")
+    // console.log("user          : " + user);
+    // console.log("parentDeviceId: " + parentDeviceId);
 
     var userDeviceMap = getUserDeviceMap(user);
 
@@ -140,43 +140,77 @@ function addUserDeviceToDevice(user, device, parentDeviceId) {
     internalDevice.parent = parentDeviceId;
     internalDevice.actualDevice = device;
 
-    console.log(internalDevice);
+    // console.log(internalDevice);
 
     userDeviceMap.devices.push(internalDevice);
 
     var parent = getUserHubDevice(user, parentDeviceId);
     parent.devices.push(internalDevice);
 
-    console.log("----------------------- userDeviceMap");
-    console.log(userDeviceMap);
-    console.log("-----------------------");
+    // console.log("----------------------- userDeviceMap");
+    // console.log(userDeviceMap);
+    // console.log("-----------------------");
 
-
+    return internalDevice;
 }
 
 function getUserChildDevice(user, childDeviceId, parentDeviceId) {
     var parentDevices = getUserHubDevice(user, parentDeviceId).devices;
 
     if (parentDevices == undefined || parentDevices.length == 0) {
-        console.log("returning undefined2");
         return undefined;
     }
 
-    console.log("parentDevices");
-    console.log(parentDevices);
+    // console.log("parentDevices");
+    // console.log(parentDevices);
 
     for (var i = 0; i < parentDevices.length; i++) {
         var d = parentDevices[i];
         if (d.id == childDeviceId) {
-            console.log("returning d");
             return d;
         }
     }
     
-    console.log("returning undefined");
     return undefined;
 }
 
+function convertInternalDeviceToClientDevice(device) {
+
+    var newDevice = {};
+
+    for (var item in device) {
+        // console.log(item);
+
+        if (item != 'actualDevice' &&
+            item != 'parent' &&
+            item != 'translator'
+            ) {
+            newDevice[item] = device[item];
+        }
+    }
+
+    return newDevice;
+}
+
+function convertInternalDeviceArrayToClientArray(deviceArray) {
+    // console.log("---------- convertInternalDeviceArrayToClientArray");
+    // console.log(deviceArray);
+
+    var newDeviceArray = [];
+    for (var index in deviceArray) {
+
+        var converted = convertInternalDeviceToClientDevice(deviceArray[index]);
+        // console.log("----------");
+        // console.log(deviceArray[index]);
+        // console.log(converted);
+
+        newDeviceArray.push(converted);
+    }
+
+    // console.log(newDeviceArray);
+    // console.log("---------- ***************************************");
+    return newDeviceArray;
+}
 
 module.exports = { 
     users: users,
@@ -191,7 +225,10 @@ module.exports = {
     getUserDevice: getUserDevice,
     addUserDevice: addUserDevice,
     addUserDeviceToDevice: addUserDeviceToDevice,
-    getUserChildDevice: getUserChildDevice
+    getUserChildDevice: getUserChildDevice,
+
+    convertInternalDeviceToClientDevice: convertInternalDeviceToClientDevice,
+    convertInternalDeviceArrayToClientArray: convertInternalDeviceArrayToClientArray
 };
 
 
