@@ -2,10 +2,12 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
+var https = require('https');
 
 var config = require("./config");
 
 var hubRouter = require('./hubRouter');
+var deviceRouter = require('./deviceRouter');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -78,6 +80,7 @@ function doAuthorization(req, res, next) {
 }
 
 app.use('/hubs', hubRouter);
+app.use('/devices', deviceRouter);
 
 app.get('/', function (req, res) {
     res.send('Welcome to the opent2t example service!');
