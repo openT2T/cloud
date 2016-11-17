@@ -86,6 +86,66 @@ app.get('/', function (req, res) {
     res.send('Welcome to the opent2t example service!');
 });
 
+app.get('/test', function (req, res) {
+    var hubController = new (require("./hubController.js"));
+    console.log(hubController);
+    hubController.supportedHubs().then((hubs) => {
+        console.log("got hubs");
+
+        var onboardingInfo = [
+            { 
+                username: "arjunl@microsoft.com",
+                password: "Sharingisfun5!"
+            },
+            {
+                client_id: "f9112028925430b8cfea2cbb322882bb",
+                client_secret: "fa453b28f7520b1bfa776789e38e0e9e"
+            }
+        ];
+
+        hubController.onboard("winkHub", onboardingInfo).then((authInfo) => {
+            console.log("onboarding done");
+            console.log(authInfo);
+
+            var opent2tBlob = {
+                "schema":"opent2t.p.light",
+                "translator":"opent2t-translator-com-wink-lightbulb",
+                "controlId":"1985159"
+            };
+            // hubController.getPlatform("winkHub", authInfo, opent2tBlob).then((platform) => {
+            //     console.log("platform done");
+            //     console.log(platform);
+            //     res.send(platform);
+            // });
+
+            hubController.setResource("winkHub", authInfo, opent2tBlob, "F8CFB903-58BB-4753-97E0-72BD7DBC7933", "power", {'value':false}).then((platform) => {
+                console.log("platform done");
+                console.log(platform);
+                res.send(platform);
+            });
+
+            // hubController.platforms("winkHub", authInfo).then((platforms) => {
+            //     console.log("platforms done");
+            //     console.log(platforms);
+            //     res.send(platforms);
+            // });
+
+        }).catch( (err) => {
+            console.log("onboarding3 error");
+            console.log(err);
+            res.send(err);
+        });
+
+        //res.send(hubs);
+    }).catch( (err) => {
+        console.log("onboarding2 error");
+        console.log(err);
+        res.send(err);
+    });
+
+
+});
+
 app.listen(828, function () {
     console.log('Example opent2t service listening on port 828!');
 });
