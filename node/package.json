@@ -14,7 +14,9 @@
     "https": "^1.0.0",
     "pug": "^2.0.0-beta5",
     "q": "^1.4.1",
-    "randomstring": "^1.1.5"
+    "randomstring": "^1.1.5",
+    "request-promise": "*",
+    "request": "*"
   },
   "devDependencies": {
     "ava": "^0.15.2",

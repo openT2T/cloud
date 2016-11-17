@@ -64,7 +64,7 @@ class HubController {
                 return supportedHubs(hubs, i + 1);
             }
         }).catch((err) => {
-            this._logError(erro, "supportedHubs");
+            this._logError(err, "supportedHubs");
             return [];
         });
     }
@@ -89,11 +89,11 @@ class HubController {
      */
     platforms(hubId, authInfo) {
         console.log("----------------- platforms");
-        // will currently return hub get contents
+        // will return hub getPlatform contents
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // hug get
-                return this._getProperty(hubInstance, authInfo, "get", true);
+                return this._getProperty(hubInstance, authInfo, "getPlatforms", true);
             });
         }).catch((err) => {
             this._logError(err, "platforms");
@@ -105,7 +105,6 @@ class HubController {
      */
     getPlatform(hubId, authInfo, opent2tBlob) {
         console.log("----------------- getPlatform");
-        // will currently return hub get contents
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // platform get
@@ -125,10 +124,9 @@ class HubController {
      */
     setResource(hubId, authInfo, opent2tBlob, deviceId, resoureceId, resourceBlob) {
         console.log("----------------- setResource");
-        // will currently return hub get contents
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
-                // platform get
+                // resource set
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};

@@ -1,9 +1,6 @@
 const sleep = require('es6-sleep').promise;
 var test = require('ava');
-var config = require('./testConfig');
-
-// console.log("Config:");
-// console.log(JSON.stringify(config, null, 2));
+var config = require('./hubController-testConfig');
 
 var hubControllerPath = require('path').join(__dirname, '..');
 var HubController = require("../hubController");
@@ -23,24 +20,23 @@ test.serial("Valid Hub Controller", t => {
 /// Run a series of tests to validate the translator
 ///
 
-// Set/Get power Value via setters for individual properties
 test.serial('SupportedHubs', async t => {
-
-    var supportedHubs = await hubController.supportedHubs()
+    var supportedHubs = await hubController.supportedHubs();
+    t.truthy(supportedHubs);
     t.is(supportedHubs instanceof Array, true);
     t.is(supportedHubs.length > 0, true);
 });
 
 test.serial('GetPlatforms', async t => {
-    
     var platforms = await hubController.platforms(config.hubId, authInfo);
+    t.truthy(platforms);
     t.is(platforms.platforms.length > 0, true);
 });
 
 test.serial('getPlatform', async t => {
-
     var platform = await hubController.getPlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob);
-    t.is(platform != undefined, true);
-    t.is(platform.entitites.resources.length > 0, true);
+    t.truthy(platform);
+    t.truthy(platform.entities);
+    t.truthy(platform.entities[0]);
+    t.is(platform.entities[0].resources.length > 0, true);
 });
-

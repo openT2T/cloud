@@ -1,0 +1,30 @@
+{
+    "hubId":"winkHub",
+    "onboardingInfo" : [
+        { 
+            "username": "",
+            "password": ""
+        },
+        {
+            "client_id": "",
+            "client_secret": ""
+        }
+    ],
+    "getPlatform": { 
+        "opent2tBlob" : {
+            "schema":"opent2t.p.light",
+            "translator":"opent2t-translator-com-wink-lightbulb",
+            "controlId":"1985159"
+        }
+    }, 
+    "setResource": { 
+        "opent2tBlob" : {
+            "schema":"opent2t.p.light",
+            "translator":"opent2t-translator-com-wink-lightbulb",
+            "controlId":"1985159"
+        },
+        "deviceId": "",
+        "resource": "power",
+        "resourceBlob": {"value":true}
+    }
+}
