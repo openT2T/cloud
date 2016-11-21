@@ -28,7 +28,7 @@ class HubController {
      */
     supportedHubs(hubs, i) {
         // use cache if we have it
-        if (this.supportedHubsCache != undefined) {
+        if (this.supportedHubsCache !== undefined) {
             return q(this.supportedHubsCache);
         }
 
@@ -103,7 +103,7 @@ class HubController {
         // will return hub getPlatform contents
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
-                // hug get
+                // hub get
                 return this._invokeMethod(hubInstance, authInfo, "getPlatforms", [true]);
             });
         }).catch((err) => {
@@ -152,10 +152,9 @@ class HubController {
         });
     }
 
-
-    /// *********************************
-    /// helper methods
-    /// *********************************
+    /**
+     * helper methods
+     */
     _getHubInfo(hubId) {
         console.log("----------------- _getHubInfo");
         return this.supportedHubs().then((hubs) => {
