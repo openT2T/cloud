@@ -1,4 +1,7 @@
-
+/*
+ * This file contains all the supported hubs. As hubs are configured and ready
+ * to be used, this file should be updated.
+ */
 
 var hubs = [
     { 
