@@ -9,7 +9,7 @@ var translatorPath = require('path').join(__dirname, '..', 'temp', 'translators'
 
 hubRouter.get("/", function (req, res) {
     res.send(config.hubs);  
-});
+}); 
 
 // this renders the sign in form for the given hub id
 // this is currently just for apiary sync, onboarding is a superset of this
