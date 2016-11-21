@@ -2,7 +2,6 @@ const sleep = require('es6-sleep').promise;
 var test = require('ava');
 var config = require('./hubController-testConfig');
 
-var hubControllerPath = require('path').join(__dirname, '..');
 var HubController = require("../hubController");
 var hubController = new HubController();
 var authInfo = undefined;
