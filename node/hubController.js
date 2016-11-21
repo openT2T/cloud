@@ -14,6 +14,17 @@ class HubController {
 
     /** 
      * returns the list of supported hubs 
+     * format is as follows:
+     * [
+     *   {
+     *     id: "hubId",
+     *     name: hubName",
+     *     translator: "name of hub translator",
+     *     onboarding: "name of hub onboarding",
+     *     // this is the onboardingFlow object as defined by the hub's manifest.xml'
+     *     onboardingFlow: {}
+     *   }
+     * ]
      */
     supportedHubs(hubs, i) {
         // use cache if we have it
@@ -61,7 +72,7 @@ class HubController {
             }
             // we are not done, recurse to the next hub
             else {
-                return supportedHubs(hubs, i + 1);
+                return this.supportedHubs(hubs, i + 1);
             }
         }).catch((err) => {
             this._logError(err, "supportedHubs");
@@ -93,7 +104,7 @@ class HubController {
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // hug get
-                return this._getProperty(hubInstance, authInfo, "getPlatforms", true);
+                return this._invokeMethod(hubInstance, authInfo, "getPlatforms", [true]);
             });
         }).catch((err) => {
             this._logError(err, "platforms");
@@ -112,7 +123,7 @@ class HubController {
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
                 deviceInfo.deviceInfo.opent2t = opent2tBlob;
-                return this._getProperty(opent2tBlob.translator, deviceInfo, "get", true);
+                return this._invokeMethod(opent2tBlob.translator, deviceInfo, "get", [true]);
             });
         }).catch((err) => {
             this._logError(err, "getPlatform");
@@ -168,15 +179,15 @@ class HubController {
         });
     }
 
-    _getProperty(translator, deviceInfo, property, value) {
-        console.log("----------------- _getProperty " + property);
+    _invokeMethod(translator, deviceInfo, methodName, params) {
+        console.log("----------------- _invokeMethod " + methodName);
 
         if (typeof translator === "object") {
-            return this.OpenT2T.invokeMethodAsync(translator, "", property, [value]);
+            return this.OpenT2T.invokeMethodAsync(translator, "", methodName, params);
         } 
         else {
             return this._createTranslator(translator, deviceInfo).then(translatorInstance => {
-                return this.OpenT2T.invokeMethodAsync(translatorInstance, "", property, [value]);
+                return this.OpenT2T.invokeMethodAsync(translatorInstance, "", methodName, params);
             });
         }
     }

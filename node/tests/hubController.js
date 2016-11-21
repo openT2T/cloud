@@ -22,6 +22,9 @@ test.serial("Valid Hub Controller", t => {
 
 test.serial('SupportedHubs', async t => {
     var supportedHubs = await hubController.supportedHubs();
+    console.log("*******************");
+    console.log(JSON.stringify(supportedHubs, null, 2));
+    console.log("*******************");
     t.truthy(supportedHubs);
     t.is(supportedHubs instanceof Array, true);
     t.is(supportedHubs.length > 0, true);
