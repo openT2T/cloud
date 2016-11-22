@@ -166,8 +166,8 @@ class HubController {
                 deviceInfo.deviceInfo = {};
                 deviceInfo.deviceInfo.opent2t = opent2tBlob;
 
-                return this._createTranslator(translatorName, deviceInfo).then(translator => {
-                    return this.OpenT2T.invokeMethodAsync(translator, "", "subscribe", [callbackUrl]);
+                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [callbackUrl]);
                 });
             });
         }).catch((err) => {
@@ -188,8 +188,8 @@ class HubController {
                 deviceInfo.deviceInfo = {};
                 deviceInfo.deviceInfo.opent2t = opent2tBlob;
 
-                return this._createTranslator(translatorName, deviceInfo).then(translator => {
-                    return this.OpenT2T.invokeMethodAsync(translator, "", "subscribe", [null, verificationBlob]);
+                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [null, verificationBlob]);
                     // returns an object that contains the expiration and the response
                 });
             });
@@ -218,7 +218,7 @@ class HubController {
             this._logError(err, "translatePlatforms");
         });
     }
-    
+
     /**
      * helper methods
      */
