@@ -19,6 +19,17 @@ test.serial("Valid Hub Controller", t => {
 /// Run a series of tests to validate the translator
 ///
 
+test.serial("RefreshAuthToken returns a valid non-error response", async t => {
+    console.log("DEBUGGING - AuthInfo");
+    console.log(authInfo);
+    var refreshedAuthInfo = await hubController.refreshAuthToken(config.hubId, config.onboardingInfo, authInfo);
+    console.log("*******************");
+    console.log(JSON.stringify(refreshedAuthInfo));
+    console.log("*******************");
+    t.truthy(refreshedAuthInfo);
+    t.not(refreshedAuthInfo.accessToken, authInfo.accessToken, "refreshAuthToken failed to update auth token"); 
+});
+
 test.serial('SupportedHubs', async t => {
     var supportedHubs = await hubController.supportedHubs();
     console.log("*******************");
@@ -31,6 +42,7 @@ test.serial('SupportedHubs', async t => {
 
 test.serial('GetPlatforms', async t => {
     var platforms = await hubController.platforms(config.hubId, authInfo);
+    console.log(platforms);
     t.truthy(platforms);
     t.is(platforms.platforms.length > 0, true);
 });
