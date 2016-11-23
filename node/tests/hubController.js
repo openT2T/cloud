@@ -20,10 +20,8 @@ test.serial("Valid Hub Controller", t => {
 ///
 
 test.serial("RefreshAuthToken returns a valid non-error response", async t => {
-    console.log("DEBUGGING - AuthInfo");
-    console.log(authInfo);
     var refreshedAuthInfo = await hubController.refreshAuthToken(config.hubId, config.onboardingInfo, authInfo);
-    console.log("*******************");
+    console.log("********New Auth Info***********");
     console.log(JSON.stringify(refreshedAuthInfo));
     console.log("*******************");
     t.truthy(refreshedAuthInfo);
