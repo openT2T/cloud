@@ -174,6 +174,73 @@ class HubController {
     }
 
     /**
+     * Subscribe for notifications on all resources composing a platform.  Notifications will be posted to to
+     * the callbackURL.
+     */
+    subscribePlatform(hubId, authInfo, opent2tBlob, callbackUrl) {
+        console.log("----------------- subscribePlatform");
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
+
+                var deviceInfo = {};
+                deviceInfo.hub = hubInstance;
+                deviceInfo.deviceInfo = {};
+                deviceInfo.deviceInfo.opent2t = opent2tBlob;
+
+                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [callbackUrl]);
+                });
+            });
+        }).catch((err) => {
+            this._logError(err, "subscribePlatform");
+        });
+    }
+
+    /**
+     * Verification step for cloud notifications for providers that require it.
+     */
+    subscribePlatformVerify(hubId, authInfo, opent2tBlob, verificationBlob) {
+        console.log("----------------- subscribePlatformVerify");
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
+
+                var deviceInfo = {};
+                deviceInfo.hub = hubInstance;
+                deviceInfo.deviceInfo = {};
+                deviceInfo.deviceInfo.opent2t = opent2tBlob;
+
+                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [null, verificationBlob]);
+                    // returns an object that contains the expiration and the response
+                });
+            });
+        }).catch((err) => {
+            this._logError(err, "subscribePlatformVerify");
+        });
+    }
+
+    /**
+     * Translate a JSON blob from a provider into an opent2t/OCF schema.  This should be called with the contents of
+     * the notification post backs.
+     * Returns an array of translated platforms, even for a single item (size 1 obviously)
+     */
+    translatePlatforms(hubId, authInfo, providerBlob) {
+        console.log("----------------- translatePlatforms");
+        
+        // Create a hub, of the requested type.
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            // Pass the provider blob off to the hub for translation.
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
+                // The getPlatforms method on the hub can take either single providerSchema, or a list depending
+                // on the service that provided the notification.  It's up the the hub to know what to do with the data.
+                return this.OpenT2T.invokeMethodAsync(hubInstance, "", "getPlatforms", [true, providerBlob]);
+            });
+        }).catch((err) => {
+            this._logError(err, "translatePlatforms");
+        });
+    }
+
+    /**
      * helper methods
      */
     _getHubInfo(hubId) {

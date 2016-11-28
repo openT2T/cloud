@@ -1,15 +1,5 @@
 {
     "hubId":"winkHub",
-    "onboardingInfo" : [
-        { 
-            "username": "",
-            "password": ""
-        },
-        {
-            "client_id": "",
-            "client_secret": ""
-        }
-    ],
     "getPlatform": { 
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
@@ -26,5 +16,28 @@
         "deviceId": "",
         "resource": "power",
         "resourceBlob": {"value":true}
+    },
+    "subscription": {
+        "topic" : "http://someserver/light_bulbs/2120684",
+        "challenge" : "challengestring",
+        "expiration" : "1",
+        "sampleFeed" : {
+            "device_manufacturer": "foo",
+            "manufacturer_device_id": "foo",
+            "manufacturer_device_model": "bar",
+            "model_name" : "My Light",
+            "object_id": "1985159",
+            "object_type": "light_bulb",
+            "light_bulb_id": "1985159",
+            "uuid": "unique uuid",
+            "last_reading" : {
+                "powered" : true,
+                "brightness" : 75
+            },
+            "desired_state" : {
+                "powered" : true,
+                "brightness" : 75
+            }
+        }
     }
 }
