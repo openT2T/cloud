@@ -96,6 +96,27 @@ class HubController {
     }
 
     /**
+     * Given a specific hub info, onboardingInfo, and existing authInfo blob,
+     *  does the OAuthToken refresh, and returns the refreshed
+     * auth info object back.
+     */
+    refreshAuthToken(hubId, onboardingInfo, existingAuthInfo){
+        console.log("----------------- refreshAuthToken");
+
+        return this._getHubInfo(hubId).then((hubInfo) => {
+
+            // create hub translator for given hubId
+            return this._createTranslator(hubInfo.translator, existingAuthInfo).then((hubInstance) => {
+                
+                // hub refreshAuthToken
+                return this._invokeMethod(hubInstance, "", "refreshAuthToken", [onboardingInfo]);
+            });
+        }).catch((err) => {
+            this._logError(err, "refreshAuthToken");
+        });
+    }
+
+    /**
      * given the specific hub id, returns all the platforms which are connected to it
      */
     platforms(hubId, authInfo) {
@@ -246,7 +267,7 @@ class HubController {
     }
 
     _invokeMethod(translator, deviceInfo, methodName, params) {
-        console.log("----------------- _invokeMethod " + methodName);
+        console.log("----------------- _invokeMethod " + methodName + " with params "+ JSON.stringify(params));
 
         if (typeof translator === "object") {
             return this.OpenT2T.invokeMethodAsync(translator, "", methodName, params);
