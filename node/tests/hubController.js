@@ -71,7 +71,7 @@ test.serial('getPlatform', async t => {
 
 test.serial('subscribePlatform', async t => {
     // Subscribe the the platform specified in the test config
-    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.callbackUrl);
+    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.truthy(subscription.expiration);
@@ -79,13 +79,13 @@ test.serial('subscribePlatform', async t => {
 
 test.serial('subscribePlatformVerify', async t => {
     // Verify PubSubHubbub (Wink) style subscription verification.
-    var verificationRequest = {};
-    verificationRequest.url = "http://contoso.com:8000?hub.topic=" + config.subscription.topic +
+    config.subscriptionInfo.verificationRequest = {};
+    config.subscriptionInfo.verificationRequest.url = "http://contoso.com:8000?hub.topic=" + config.subscription.topic +
         "&hub.challenge=" + config.subscription.challenge + 
         "&hub.lease_seconds=" + config.subscription.expiration +
         "&hub.mode=subscribe";
     
-    var subscription = await hubController.subscribePlatformVerify(config.hubId, authInfo, config.getPlatform.opent2tBlob, verificationRequest);
+    var subscription = await hubController.subscribePlatformVerify(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.is(subscription.response, config.subscription.challenge);
@@ -93,7 +93,13 @@ test.serial('subscribePlatformVerify', async t => {
 });
 
 test.serial('translatePlatforms', async t => {
-    var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed);
+    var verificationInfo = {};
+    verificationInfo.key = config.subscriptionInfo.key;
+
+    // Calculate an HMAC for the message that will be validated successfully
+    verificationInfo.hmac = require('crypto').createHmac('sha1', config.subscription.key).update(config.subscription.sampleFeed).digest('hex');
+
+    var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
     console.log(JSON.stringify(translatedFeed, null, 2));
     t.truthy(translatedFeed);
     t.truthy(translatedFeed.platforms);    
@@ -101,4 +107,14 @@ test.serial('translatePlatforms', async t => {
     t.truthy(translatedFeed.platforms[0].entities);
     t.truthy(translatedFeed.platforms[0].entities[0]);
     t.is(translatedFeed.platforms[0].entities[0].resources.length > 0, true);
+});
+
+test.serial('translatePlatformsInvalidHmac', async t => {
+    var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
+
+    var verificationInfo = {};
+    verificationInfo.key = config.subscriptionInfo.key;
+    verifcationInfo.hmac = "this_wont_match_the_hash";
+
+    t.throws(hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo));
 });
