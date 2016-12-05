@@ -196,26 +196,40 @@ class HubController {
         });
     }
 
-    /**
-     * Verification step for cloud notifications for providers that require it.
+    /** 
+     * Unsubscribe notification on all resources from a platform.
      */
-    subscribePlatformVerify(hubId, authInfo, opent2tBlob, verificationBlob) {
-        console.log("----------------- subscribePlatformVerify");
+    unsubscribePlatform(hubId, authInfo, subscriptionInfo) {
+        console.log("----------------- unsubscribePlatform");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
-                deviceInfo.deviceInfo.opent2t = opent2tBlob;
+                deviceInfo.deviceInfo.opent2t = opent2tBlob; 
+
+                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "deleteSubscribe", [subscriptionInfo]);
+                });
+            });
+        }).catch((err) => {
+            this._logError(err, "subscribePlatform");
+        });
+    }
+
+    /**
+     * Verification step for cloud notifications for providers that require it.
+     */
+    subscribeVerify(hubId, authInfo, verificationBlob) {
+        console.log("----------------- subscribeVerify");
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
                 var subscriptionInfo = {};
                 subscriptionInfo.verificatioRequest = verificationBlob;
 
-                return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
-                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [subscriptionInfo]);
-                    // returns an object that contains the expiration and the response
-                });
+                return this.OpenT2T.invokeMethodAsync(hubInstance, "", "postSubscribe", [subscriptionInfo]);
             });
         }).catch((err) => {
             this._logError(err, "subscribePlatformVerify");

@@ -77,7 +77,14 @@ test.serial('subscribePlatform', async t => {
     t.truthy(subscription.expiration);
 });
 
-test.serial('subscribePlatformVerify', async t => {
+test.serial('unsubscribePlatform', async t => {
+    var subscription = await hubController.unsubscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    console.log(JSON.stringify(subscription, null, 2));
+    t.truthy(subscription);
+    t.is(subscription.expiration, 0);
+});
+
+test.serial('subscribeVerify', async t => {
     // Verify PubSubHubbub (Wink) style subscription verification.
     config.subscriptionInfo.verificationRequest = {};
     config.subscriptionInfo.verificationRequest.url = "http://contoso.com:8000?hub.topic=" + config.subscription.topic +
@@ -85,7 +92,7 @@ test.serial('subscribePlatformVerify', async t => {
         "&hub.lease_seconds=" + config.subscription.expiration +
         "&hub.mode=subscribe";
     
-    var subscription = await hubController.subscribePlatformVerify(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    var subscription = await hubController.subscribeVerify(config.hubId, authInfo, config.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.is(subscription.response, config.subscription.challenge);
