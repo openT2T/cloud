@@ -227,7 +227,7 @@ class HubController {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
                 var subscriptionInfo = {};
-                subscriptionInfo.verificatioRequest = verificationBlob;
+                subscriptionInfo.verificationRequest = verificationBlob;
 
                 return this.OpenT2T.invokeMethodAsync(hubInstance, "", "postSubscribe", [subscriptionInfo]);
             });
@@ -240,6 +240,10 @@ class HubController {
      * Translate a JSON blob from a provider into an opent2t/OCF schema.  This should be called with the contents of
      * the notification post backs.  Verification is an optional object providing a secret and a hash for verification of the payload.
      * Returns an array of translated platforms, even for a single item (size 1 obviously)
+     * 
+     * @param {Object} verificationInfo
+     * @param {string} verificationInfo.key - Secret key used to compute HMAC
+     * @param {Object} verificationInfo.header - Headers from the notification which will contain a provider specific HMAC.
      */
     translatePlatforms(hubId, authInfo, providerBlob, verificationInfo) {
         console.log("----------------- translatePlatforms");
