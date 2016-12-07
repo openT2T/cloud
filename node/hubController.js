@@ -199,7 +199,7 @@ class HubController {
     /** 
      * Unsubscribe notification on all resources from a platform.
      */
-    unsubscribePlatform(hubId, authInfo, subscriptionInfo) {
+    unsubscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo) {
         console.log("----------------- unsubscribePlatform");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
@@ -214,10 +214,10 @@ class HubController {
                 });
             });
         }).catch((err) => {
-            this._logError(err, "subscribePlatform");
+            this._logError(err, "unsubscribePlatform");
         });
     }
-
+    
     /**
      * Verification step for cloud notifications for providers that require it.
      */

@@ -71,14 +71,14 @@ test.serial('getPlatform', async t => {
 
 test.serial('subscribePlatform', async t => {
     // Subscribe the the platform specified in the test config
-    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscription.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.truthy(subscription.expiration);
 });
 
 test.serial('unsubscribePlatform', async t => {
-    var subscription = await hubController.unsubscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    var subscription = await hubController.unsubscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscription.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.is(subscription.expiration, 0);
@@ -92,7 +92,7 @@ test.serial('subscribeVerify', async t => {
         "&hub.lease_seconds=" + config.subscription.expiration +
         "&hub.mode=subscribe";
     
-    var subscription = await hubController.subscribeVerify(config.hubId, authInfo, config.subscriptionInfo);
+    var subscription = await hubController.subscribeVerify(config.hubId, authInfo, config.subscription.subscriptionInfo);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.is(subscription.response, config.subscription.challenge);
@@ -104,8 +104,10 @@ test.serial('translatePlatforms', async t => {
     verificationInfo.key = config.subscriptionInfo.key;
 
     // Calculate an HMAC for the message that will be validated successfully
-    verificationInfo.hmac = require('crypto').createHmac('sha1', config.subscription.key).update(config.subscription.sampleFeed).digest('hex');
-
+    var hmac = require('crypto').createHmac('sha1', config.subscription.key);
+    hmac.update(config.subscription.sampleFeed);
+    verificationInfo.hmac = hmac.digest(config.subscription.sampleFeed);
+    
     var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
     console.log(JSON.stringify(translatedFeed, null, 2));
     t.truthy(translatedFeed);
@@ -117,7 +119,6 @@ test.serial('translatePlatforms', async t => {
 });
 
 test.serial('translatePlatformsInvalidHmac', async t => {
-    var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
 
     var verificationInfo = {};
     verificationInfo.key = config.subscriptionInfo.key;
