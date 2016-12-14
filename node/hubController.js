@@ -175,9 +175,9 @@ class HubController {
 
     /**
      * Subscribe for notifications on all resources composing a platform.  Notifications will be posted to to
-     * the callbackURL.
+     * the subscriptionInfo.callbackURL.
      */
-    subscribePlatform(hubId, authInfo, opent2tBlob, callbackUrl) {
+    subscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo) {
         console.log("----------------- subscribePlatform");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
@@ -185,10 +185,10 @@ class HubController {
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
-                deviceInfo.deviceInfo.opent2t = opent2tBlob;
+                deviceInfo.deviceInfo.opent2t = opent2tBlob; 
 
                 return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
-                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [callbackUrl]);
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [subscriptionInfo]);
                 });
             });
         }).catch((err) => {
@@ -196,23 +196,40 @@ class HubController {
         });
     }
 
-    /**
-     * Verification step for cloud notifications for providers that require it.
+    /** 
+     * Unsubscribe notification on all resources from a platform.
      */
-    subscribePlatformVerify(hubId, authInfo, opent2tBlob, verificationBlob) {
-        console.log("----------------- subscribePlatformVerify");
+    unsubscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo) {
+        console.log("----------------- unsubscribePlatform");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
-                deviceInfo.deviceInfo.opent2t = opent2tBlob;
+                deviceInfo.deviceInfo.opent2t = opent2tBlob; 
 
                 return this._createTranslator(opent2tBlob.translator, deviceInfo).then(translator => {
-                    return this.OpenT2T.invokeMethodAsync(translator, "", "postSubscribe", [null, verificationBlob]);
-                    // returns an object that contains the expiration and the response
+                    return this.OpenT2T.invokeMethodAsync(translator, "", "deleteSubscribe", [subscriptionInfo]);
                 });
+            });
+        }).catch((err) => {
+            this._logError(err, "unsubscribePlatform");
+        });
+    }
+    
+    /**
+     * Verification step for cloud notifications for providers that require it.
+     */
+    subscribeVerify(hubId, authInfo, verificationBlob) {
+        console.log("----------------- subscribeVerify");
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
+
+                var subscriptionInfo = {};
+                subscriptionInfo.verificationRequest = verificationBlob;
+
+                return this.OpenT2T.invokeMethodAsync(hubInstance, "", "postSubscribe", [subscriptionInfo]);
             });
         }).catch((err) => {
             this._logError(err, "subscribePlatformVerify");
@@ -221,10 +238,14 @@ class HubController {
 
     /**
      * Translate a JSON blob from a provider into an opent2t/OCF schema.  This should be called with the contents of
-     * the notification post backs.
+     * the notification post backs.  Verification is an optional object providing a secret and a hash for verification of the payload.
      * Returns an array of translated platforms, even for a single item (size 1 obviously)
+     * 
+     * @param {Object} verificationInfo
+     * @param {string} verificationInfo.key - Secret key used to compute HMAC
+     * @param {Object} verificationInfo.header - Headers from the notification which will contain a provider specific HMAC.
      */
-    translatePlatforms(hubId, authInfo, providerBlob) {
+    translatePlatforms(hubId, authInfo, providerBlob, verificationInfo) {
         console.log("----------------- translatePlatforms");
         
         // Create a hub, of the requested type.
@@ -233,7 +254,7 @@ class HubController {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // The getPlatforms method on the hub can take either single providerSchema, or a list depending
                 // on the service that provided the notification.  It's up the the hub to know what to do with the data.
-                return this.OpenT2T.invokeMethodAsync(hubInstance, "", "getPlatforms", [true, providerBlob]);
+                return this.OpenT2T.invokeMethodAsync(hubInstance, "", "getPlatforms", [true, providerBlob, verificationInfo]);
             });
         }).catch((err) => {
             this._logError(err, "translatePlatforms");

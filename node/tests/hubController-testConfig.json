@@ -4,20 +4,24 @@
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"1985159"
+            "controlId":"2120684"
         }
     }, 
     "setResource": { 
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"1985159"
+            "controlId":"2120684"
         },
         "deviceId": "",
         "resource": "power",
         "resourceBlob": {"value":true}
     },
     "subscription": {
+        "subscriptionInfo": {
+            "callbackUrl": "http://drsubscriptiontest.azurewebsites.net/subs",
+            "key": "imalwaysangry"
+        },
         "topic" : "http://someserver/light_bulbs/2120684",
         "challenge" : "challengestring",
         "expiration" : "1",
@@ -26,9 +30,9 @@
             "manufacturer_device_id": "foo",
             "manufacturer_device_model": "bar",
             "model_name" : "My Light",
-            "object_id": "1985159",
+            "object_id": "2120684",
             "object_type": "light_bulb",
-            "light_bulb_id": "1985159",
+            "light_bulb_id": "2120684",
             "uuid": "unique uuid",
             "last_reading" : {
                 "powered" : true,
