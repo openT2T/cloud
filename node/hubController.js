@@ -321,27 +321,16 @@ class HubController {
     }
 
     _handleError(err, message) {
-        console.log("------------ API failed: -" + message);
+        let customMessage = "OpenT2T call failed in: " + message + "; Original message: ";
         
-        // If already an OpenT2TError type reject right-away; Nothing to transform
-        if (err instanceof OpenT2TErrorClass){
-            console.log(" OpenT2t error message:           " + err.message);
-            console.log(" OpenT2t error name:           " + err.name);
-            console.log(" OpenT2t error statusCode:           " + err.statusCode);
-            console.log(" OpenT2t error innerError message:           " +  err.innerError.message);
-            console.log(" OpenT2t error innerError stack:           " +  err.innerError.stack);
-
-            return q.reject(err);
-        }
-
-        var customMessage = "OpenT2T call failed in: " + message + "; Original message: ";
-        if (err.response.statusMessage){
+        if (err.response.statusMessage) {
+            // This was a result of a failed HTTP Request
             customMessage = customMessage + err.response.statusMessage;
         }
-        else{
+        else {
             customMessage = customMessage + err.message;
         }
-    
+
         let customError = new OpenT2TErrorClass(err.statusCode, customMessage, err);
         console.log(" custom error message:           " + customError.message);
         console.log(" custom error name:           " + customError.name);
