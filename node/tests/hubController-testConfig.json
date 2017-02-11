@@ -17,11 +17,11 @@
         "resource": "power",
         "resourceBlob": {"value":true}
     },
+    "subscriptionInfo": {
+        "callbackUrl": "http://drsubscriptiontest.azurewebsites.net/subs",
+        "key": "imalwaysangry"
+    },
     "subscription": {
-        "subscriptionInfo": {
-            "callbackUrl": "http://drsubscriptiontest.azurewebsites.net/subs",
-            "key": "imalwaysangry"
-        },
         "topic" : "http://someserver/light_bulbs/2120684",
         "challenge" : "challengestring",
         "expiration" : "1",
