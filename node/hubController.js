@@ -280,7 +280,7 @@ class HubController {
 
             if (hubInfo == undefined) {
                 console.log("invalid hub id");
-                throw new Error("Invalid hub id");
+                throw new OpenT2TErrorClass(400, "Invalid hub id");
             }
 
             return hubInfo;
@@ -321,13 +321,15 @@ class HubController {
     }
 
     _handleError(err, message) {
-        let customMessage = "OpenT2T call failed in: " + message + "; Original message: ";
+        let customMessage = "OpenT2T call failed in: " + message + "; Original message: "; 
         
-        if (err.response.statusMessage) {
-            // This was a result of a failed HTTP Request
+        // This was a result of a failed HTTP Request promise
+        // Can also check err.Name
+        if ('response' in err && 'statusMessage' in err.response) {
             customMessage = customMessage + err.response.statusMessage;
-        }
+        }   
         else {
+            // Likely an simple Error-derived class 
             customMessage = customMessage + err.message;
         }
 
