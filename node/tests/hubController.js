@@ -139,3 +139,25 @@ test.serial('translatePlatformsInvalidHmac', async t => {
    t.is(error.statusCode, 400);
    t.is(error.innerError.message, "Payload signature doesn't match.");
 });
+
+test.serial('InvalidHubIdThrowsForAnyAPI', async t => {
+    const error = await t.throws(hubController.onboard("NonExistentHub", onboardingConfig.onboardingInfo));
+    t.is(error.name, "OpenT2TError");
+    t.is(error.statusCode, 400);
+    t.is(error.innerError.message, "Invalid hub id");
+});
+
+test.serial('UndefinedOnboardingInfoForRefreshAuthTokenThrows', async t => {
+    const error = await t.throws(hubController.refreshAuthToken(config.hubId, "undefined", authInfo));
+    t.is(error.name, "OpenT2TError");
+    t.is(error.statusCode, 400);
+    t.is(error.innerError.message, "Invalid authInfo object.Please provide the existing authInfo object  with clientId + client_secret to allow the oAuth token to be refreshed");
+});
+
+test.serial('InvalidOnboardingInfoForRefreshAuthTokenThrows', async t =>{
+    var invalidOnboardingConfig = require('./hubController-testConfig-Invalidauth.json');
+    const error = await t.throws(hubController.refreshAuthToken(config.hubId, invalidOnboardingConfig.onboardingInfo, authInfo));
+    t.is(error.name, "OpenT2TError");
+    t.is(error.statusCode, 400);
+    t.is(error.innerError.message, "Invalid authInfo object.Please provide the existing authInfo object  with clientId + client_secret to allow the oAuth token to be refreshed");
+});

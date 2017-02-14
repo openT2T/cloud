@@ -1,0 +1,8 @@
+{
+ "onboardingInfo" : [
+        { 
+            "username": "blah",
+            "password": "somepwd"
+        }
+    ]
+}
