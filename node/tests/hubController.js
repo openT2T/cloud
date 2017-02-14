@@ -137,4 +137,5 @@ test.serial('translatePlatformsInvalidHmac', async t => {
    const error = await t.throws(hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo)); 
    t.is(error.name, "OpenT2TError");
    t.is(error.statusCode, 400);
+   t.is(error.innerError.message, "Payload signature doesn't match.");
 });
