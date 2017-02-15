@@ -36,12 +36,13 @@ test.serial("Valid Hub Controller", t => {
 ///
 
 test.serial("RefreshAuthToken returns a valid non-error response", async t => {
+    var oldAccessToken = authInfo['access'].token;
     var refreshedAuthInfo = await hubController.refreshAuthToken(config.hubId, onboardingConfig.onboardingInfo, authInfo);
     console.log("********New Auth Info***********");
     console.log(JSON.stringify(refreshedAuthInfo));
     console.log("*******************");
     t.truthy(refreshedAuthInfo);
-    t.not(refreshedAuthInfo.accessToken, authInfo.accessToken, "refreshAuthToken failed to update auth token"); 
+    t.not(refreshedAuthInfo['access'].token, oldAccessToken, "refreshAuthToken failed to update auth token"); 
 });
 
 test.serial('SupportedHubs', async t => {
