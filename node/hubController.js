@@ -4,7 +4,8 @@
 
 var q = require('q');
 var hubsConfig = require("./hubsConfig");
-var OpenT2TErrorClass = require('opent2t').OpenT2TError;
+var OpenT2TError = require('opent2t').OpenT2TError;
+var OpenT2TConstants = require('opent2t').OpenT2TConstants;
 
 class HubController {
 
@@ -269,7 +270,7 @@ class HubController {
         return this.supportedHubs().then((hubs) => {
             // find the hub referenced by hubId
             var hubInfo = undefined;
-            for (var i = 0; hubInfo == undefined && i < hubs.length; i++) {
+            for (var i = 0; hubInfo === undefined && i < hubs.length; i++) {
                 var hub = hubs[i];
 
                 // intentional ==
@@ -278,9 +279,9 @@ class HubController {
                 }
             }
 
-            if (hubInfo == undefined) {
+            if (!hubInfo) {
                 console.log("invalid hub id");
-                throw new OpenT2TErrorClass(400, "Invalid hub id");
+                throw new OpenT2TError(404, OpenT2TConstants.InvalidHubId);
             }
 
             return hubInfo;
@@ -333,7 +334,7 @@ class HubController {
             customMessage = customMessage + err.message;
         }
 
-        let customError = new OpenT2TErrorClass(err.statusCode, customMessage, err);
+        let customError = new OpenT2TError(err.statusCode, customMessage, err);
         console.log(" custom error message:           " + customError.message);
         console.log(" custom error name:           " + customError.name);
         console.log(" custom error statusCode:           " + customError.statusCode);
