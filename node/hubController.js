@@ -4,6 +4,8 @@
 
 var q = require('q');
 var hubsConfig = require("./hubsConfig");
+var OpenT2TError = require('opent2t').OpenT2TError;
+var OpenT2TConstants = require('opent2t').OpenT2TConstants;
 
 class HubController {
 
@@ -75,8 +77,7 @@ class HubController {
                 return this.supportedHubs(hubs, i + 1);
             }
         }).catch((err) => {
-            this._logError(err, "supportedHubs");
-            return [];
+            return this._handleError(err, "supportedHubs");
         });
     }
 
@@ -91,7 +92,7 @@ class HubController {
             var onboarding = new Onboarding();
             return onboarding.onboard(onboardingInfo);
         }).catch((err) => {
-            this._logError(err, "onboard");
+            return this._handleError(err, "onboard");
         });
     }
 
@@ -112,7 +113,7 @@ class HubController {
                 return this._invokeMethod(hubInstance, "", "refreshAuthToken", [onboardingInfo]);
             });
         }).catch((err) => {
-            this._logError(err, "refreshAuthToken");
+            return this._handleError(err, "refreshAuthToken");
         });
     }
 
@@ -128,7 +129,7 @@ class HubController {
                 return this._invokeMethod(hubInstance, authInfo, "getPlatforms", [true]);
             });
         }).catch((err) => {
-            this._logError(err, "platforms");
+            return this._handleError(err, "platforms");
         });
     }
 
@@ -147,7 +148,7 @@ class HubController {
                 return this._invokeMethod(opent2tBlob.translator, deviceInfo, "get", [true]);
             });
         }).catch((err) => {
-            this._logError(err, "getPlatform");
+           return this._handleError(err, "getPlatform");
         });
     }
 
@@ -169,7 +170,7 @@ class HubController {
                 return this._setProperty(opent2tBlob.translator, deviceInfo, propertyName, deviceId, resourceBlob);
             });
         }).catch((err) => {
-            this._logError(err, "setResource");
+            return this._handleError(err, "setResource");
         });
     }
 
@@ -192,7 +193,7 @@ class HubController {
                 });
             });
         }).catch((err) => {
-            this._logError(err, "subscribePlatform");
+            return this._handleError(err, "subscribePlatform");
         });
     }
 
@@ -214,7 +215,7 @@ class HubController {
                 });
             });
         }).catch((err) => {
-            this._logError(err, "unsubscribePlatform");
+            return this._handleError(err, "unsubscribePlatform");
         });
     }
     
@@ -232,7 +233,7 @@ class HubController {
                 return this.OpenT2T.invokeMethodAsync(hubInstance, "", "postSubscribe", [subscriptionInfo]);
             });
         }).catch((err) => {
-            this._logError(err, "subscribePlatformVerify");
+            return this._handleError(err, "subscribePlatformVerify");
         });
     }
 
@@ -257,7 +258,7 @@ class HubController {
                 return this.OpenT2T.invokeMethodAsync(hubInstance, "", "getPlatforms", [true, providerBlob, verificationInfo]);
             });
         }).catch((err) => {
-            this._logError(err, "translatePlatforms");
+            return this._handleError(err, "translatePlatforms");
         });
     }
 
@@ -269,7 +270,7 @@ class HubController {
         return this.supportedHubs().then((hubs) => {
             // find the hub referenced by hubId
             var hubInfo = undefined;
-            for (var i = 0; hubInfo == undefined && i < hubs.length; i++) {
+            for (var i = 0; hubInfo === undefined && i < hubs.length; i++) {
                 var hub = hubs[i];
 
                 // intentional ==
@@ -278,9 +279,9 @@ class HubController {
                 }
             }
 
-            if (hubInfo == undefined) {
+            if (!hubInfo) {
                 console.log("invalid hub id");
-                throw new Error("Invalid hub id");
+                throw new OpenT2TError(404, OpenT2TConstants.InvalidHubId);
             }
 
             return hubInfo;
@@ -320,10 +321,27 @@ class HubController {
         }); 
     }
 
-    _logError(err, message) {
-        console.log("------------ ERROR-" + message);
-        console.log(err)
-        console.log(err.stack);
+    _handleError(err, message) {
+        let customMessage = "OpenT2T call failed in: " + message + "; Original message: "; 
+        
+        // This was a result of a failed HTTP Request promise
+        // Can also check err.Name
+        if ('response' in err && 'statusMessage' in err.response) {
+            customMessage = customMessage + err.response.statusMessage;
+        }   
+        else {
+            // Likely an simple Error-derived class 
+            customMessage = customMessage + err.message;
+        }
+
+        let customError = new OpenT2TError(err.statusCode, customMessage, err);
+        console.log(" custom error message:           " + customError.message);
+        console.log(" custom error name:           " + customError.name);
+        console.log(" custom error statusCode:           " + customError.statusCode);
+        console.log(" custom error innerError message:           " +  customError.innerError.message);
+        console.log(" custom error innerError stack:           " +  customError.innerError.stack);
+
+        return q.reject(customError);
     }
 }
 

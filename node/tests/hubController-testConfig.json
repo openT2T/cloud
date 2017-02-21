@@ -4,23 +4,23 @@
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"2120684"
+            "controlId":"2167953"
         }
     }, 
     "setResource": { 
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"2120684"
+            "controlId":"2167953"
         },
-        "deviceId": "",
+        "deviceId": "F8CFB903-58BB-4753-97E0-72BD7DBC7933",
         "resource": "power",
         "resourceBlob": {"value":true}
     },
     "subscriptionInfo": {
-        "callbackUrl": "http://drsubscriptiontest.azurewebsites.net/subs",
-        "key": "imalwaysangry"
-    },
+            "callbackUrl": "http://drsubscriptiontest.azurewebsites.net/subs",
+            "key": "imalwaysangry"
+        },
     "subscription": {
         "topic" : "http://someserver/light_bulbs/2120684",
         "challenge" : "challengestring",
