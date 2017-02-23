@@ -1,13 +1,27 @@
 {
-  "name": "servicessample",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "opent2t-cloud",
+  "version": "0.0.1",
+  "description": "Helper classes and interface to manage opent2t cloud components. For now only the hubController management class",
+  "main": "hubController.js",
+  "files": [
+    "hubController.js",
+    "hubsConfig.js",
+    "package.json"
+  ],
   "scripts": {
-    "test": "ava"
+    "test": "ava --verbose",
+    "prepublish": "node ./publish.js prepublish",
+    "postpublish": "node ./publish.js postpublish"
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "githttps://github.com/openT2T/cloud.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openT2T/cloud/issues"
+  },
+  "homepage": "https://github.com/openT2T/cloud#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
@@ -20,6 +34,12 @@
   },
   "devDependencies": {
     "ava": "^0.18.1",
-    "es6-sleep": "*"
+    "es6-sleep": "*",
+    "shelljs": "^0.7.3"
+  },
+  "ava": {
+    "files": [
+      "test/*.js"
+    ]
   }
 }
