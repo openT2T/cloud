@@ -1,12 +1,16 @@
-# OpenT2T API Server Sample
+# OpenT2T API HubController class + server Sample
 A sample server that can be can be used to interact with similar devices using a common schema.
+
 
 > **Important:** This is just a code sample and NOT intended for any sort of real use since it does not implement any real auth or persistent storage.
 
 The API for this sample is documented at: http://docs.opent2t.apiary.io
 > **Note:** The Apiary hasn't been updated yet for error cases but soon will be. Meanwhile the section below talks about the general behavior.
 
-## General Error handling notes
+## HubController Class
+As part of this sample server, we provide a hubController class and distribute it separately outside of this sample server. This class provides for a simple management interface to controlling existing hubs and corresponding devices that the hubs control. The calls ultimately call into the OpentT2T set of libraries (see https://github.com/opent2t/opent2t) to create the actual translators, invoke the corresponding translator functions etc.
+
+### General Error handling notes
 All APIs defined here return a custom Error object of type OpenT2TError defined in the opent2t common client library (https://github.com/openT2T/opent2t).
 
 1. Any errors that are bubbled out from the library are wrapped in a custom OpenT2TError (extends built-in Error interface). All APIs are promise-based, and in case of errors, the promise is rejected with given error.
@@ -17,7 +21,7 @@ All APIs defined here return a custom Error object of type OpenT2TError defined 
 
 4. Errors from providers eg WINK etc are returned as-is and their original error codes and messages retained. The original error is bubbled up in the nested err property of the message.
 
-## Running tests
+### Running tests
 
 1. To run the tests, you need first install the node dependencies under the root cloud\node folder.
 > `npm install`
