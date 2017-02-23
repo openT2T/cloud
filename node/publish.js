@@ -4,7 +4,6 @@
 // to the package root to enable direct module references. This script copies
 // the built files to the root before publishing, then cleans them up afterward.
 
-var fs = require("fs");
 var shell = require("shelljs");
 
 if (process.argv[2] === "prepublish") {
