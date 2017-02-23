@@ -23,14 +23,7 @@
   },
   "homepage": "https://github.com/openT2T/cloud#readme",
   "dependencies": {
-    "body-parser": "^1.15.2",
-    "express": "^4.14.0",
-    "https": "^1.0.0",
-    "pug": "^2.0.0-beta5",
-    "q": "^1.4.1",
-    "randomstring": "^1.1.5",
-    "request-promise": "*",
-    "request": "*"
+    "q": "^1.4.1"
   },
   "devDependencies": {
     "ava": "^0.18.1",
