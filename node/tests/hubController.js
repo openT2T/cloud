@@ -20,7 +20,7 @@ var OpenT2TConstants = require('opent2t').OpenT2TConstants;
 var onboardingConfig = require('./hubController-testConfig-auth.json');
 
 var HubController = require("../hubController");
-var hubController = new HubController();
+var hubController = new HubController("verbose");
 var authInfo = undefined;
 
 // setup the translator before all the tests run
@@ -115,7 +115,8 @@ test.serial('translatePlatforms', async t => {
         "X-Hub-Signature": verificationInfo.hmac
     };
 
-    var translatedFeed = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
+    var translatedFeed = await hubController.translatePlatforms(
+        config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
     console.log(JSON.stringify(translatedFeed, null, 2));
     t.truthy(translatedFeed);
     t.truthy(translatedFeed.platforms);    
