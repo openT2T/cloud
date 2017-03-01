@@ -24,7 +24,7 @@
   "homepage": "https://github.com/openT2T/cloud#readme",
   "dependencies": {
     "q": "^1.4.1",
-    "opent2t": "^1.0.1"
+    "opent2t": "^1.0.4"
   },
   "devDependencies": {
     "ava": "^0.18.1",
