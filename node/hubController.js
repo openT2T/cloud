@@ -287,8 +287,8 @@ class HubController {
     }
 
     _invokeMethod(translator, deviceInfo, methodName, params) {
-        this.ConsoleLogger.verbose(
-            `_invokeMethod ${methodName} with params ${JSON.stringify(params)}`);
+        this.ConsoleLogger.info(
+            `_invokeMethod ${methodName} with params ${JSON.stringify(params, null, 2)}`);
 
         if (typeof translator === "object") {
             return this.OpenT2T.invokeMethodAsync(translator, "", methodName, params);
@@ -301,8 +301,8 @@ class HubController {
     }
     
     _setProperty(translatorName, deviceInfo, property, deviceId, value) {
-        this.ConsoleLogger.verbose(
-            `_setProperty ${translatorName} for ${property} to ${JSON.stringify(alue, null, 2)}`);
+        this.ConsoleLogger.info(
+            `_setProperty ${translatorName} for ${property} to ${JSON.stringify(value, null, 2)}`);
 
         return this._createTranslator(translatorName, deviceInfo).then(translator => {
             return this.OpenT2T.invokeMethodAsync(translator, "", property, [deviceId, value]);
@@ -314,7 +314,7 @@ class HubController {
     }
 
     _createTranslator(translatorName, deviceInfo) {
-        this.ConsoleLogger.verbose(`_createTranslator ${translatorName}`);
+        this.ConsoleLogger.info(`_createTranslator ${translatorName}`);
         return this.OpenT2T.createTranslatorAsync(translatorName, deviceInfo).then( translator => {
             return translator;
         }); 
@@ -334,11 +334,11 @@ class HubController {
         }
 
         let customError = new OpenT2TError(err.statusCode, customMessage, err);
-        this.ConsoleLogger.verbose(" custom error message:           " + customError.message);
-        this.ConsoleLogger.verbose(" custom error name:           " + customError.name);
-        this.ConsoleLogger.verbose(" custom error statusCode:           " + customError.statusCode);
-        this.ConsoleLogger.verbose(" custom error innerError message:           " + customError.innerError.message);
-        this.ConsoleLogger.verbose(" custom error innerError stack:           " + customError.innerError.stack);
+        this.ConsoleLogger.verbose(`custom error message: ${customError.message}`);
+        this.ConsoleLogger.verbose(`custom error name: ${customError.name}`);
+        this.ConsoleLogger.verbose(`custom error statusCode: ${customError.statusCode}`);
+        this.ConsoleLogger.verbose(`custom error innerError message: ${customError.innerError.message}`);
+        this.ConsoleLogger.verbose(`custom error innerError stack:  ${customError.innerError.stack}`);
 
         return q.reject(customError);
     }
