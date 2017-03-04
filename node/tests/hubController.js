@@ -109,7 +109,7 @@ test.serial('translatePlatforms', async t => {
 
     // Calculate an HMAC for the message that will be validated successfully
     var hmac = require('crypto').createHmac('sha1', config.subscriptionInfo.key);
-    hmac.update(config.subscription.sampleFeed.toString());
+    hmac.update(JSON.stringify(config.subscription.sampleFeed;
     verificationInfo.hmac = hmac.digest("hex");
     verificationInfo.header = {
         "X-Hub-Signature": verificationInfo.hmac
