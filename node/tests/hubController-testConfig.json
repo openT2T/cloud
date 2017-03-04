@@ -4,14 +4,14 @@
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"2167953"
+            "controlId":"2516533"
         }
     }, 
     "setResource": { 
         "opent2tBlob" : {
             "schema":"opent2t.p.light",
             "translator":"opent2t-translator-com-wink-lightbulb",
-            "controlId":"2167953"
+            "controlId":"2516533"
         },
         "deviceId": "F8CFB903-58BB-4753-97E0-72BD7DBC7933",
         "resource": "power",
