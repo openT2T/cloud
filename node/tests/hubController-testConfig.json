@@ -42,6 +42,13 @@
                 "powered" : true,
                 "brightness" : 75
             }
+        },
+        "translation": {
+            "unknownplatform": {
+                "model_name": "foo",
+                "object_id": "12345",
+                "object_type": "bar"
+            }
         }
     }
 }
