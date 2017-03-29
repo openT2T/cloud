@@ -173,6 +173,18 @@ class HubController {
     }
 
     /**
+     * Subscribe to notifications for device graph updates (add/remove devices from a provider)
+     */
+    subscribeDeviceGraph(hubId, authInfo, subscriptionInfo) {
+        this.ConsoleLogger.verbose("subscribeDeviceGraph()");
+        return this._getHubInfo(hubId).then((hubInfo) => {
+            return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
+                return hubInstance.postSubscribe(subscriptionInfo);
+            });
+        });
+    }
+
+    /**
      * Subscribe for notifications on all resources composing a platform.  Notifications will be posted to to
      * the subscriptionInfo.callbackURL.
      */
