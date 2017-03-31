@@ -322,25 +322,42 @@ class HubController {
 
     _handleError(err, message) {
         let customMessage = `OpenT2T call failed in: ${message}; Original message: `; 
-        
-        // This was a result of a failed HTTP Request promise
-        // Can also check err.Name
-        if ('response' in err && 'statusMessage' in err.response) {
-            customMessage = customMessage + err.response.statusMessage;
-        }   
-        else {
-            // Likely an simple Error-derived class 
-            customMessage = customMessage + err.message;
+        let customErrCode = 500;
+        let innerError = undefined;
+
+        try {
+            if (err instanceof Error) {
+                innerError = err;
+                customErrCode = err.statusCode;
+
+                // This was a result of a failed HTTP Request promise (Eg request-promise's HttpRequestError)
+                // Can also check err.Name
+                if ('response' in err && 'statusMessage' in err.response) {
+                    customMessage = customMessage + err.response.statusMessage;
+                }   
+                else {
+                    // Likely a simple Error-derived class like OpenT2TError
+                    customMessage = customMessage + err.message;
+                }
+            } else {
+                // Likely a promise rejected (eg NEST translators) with message string only instead of Error
+                // object
+                customMessage = customMessage + err;
+            }
+
+            let customError = new OpenT2TError(customErrCode, customMessage, innerError);
+            this.ConsoleLogger.error(`Returning error from hubController- 
+            Message: ${customError.message}; StatusCode: ${customError.statusCode}`);
+
+            return q.reject(customError);
         }
+        catch(unexpectedErr) {
+            let unexpectedError = new OpenT2TError(customErrCode, customMessage, unexpectedErr);
+            this.ConsoleLogger.error(`ErrorHandler in hubController ran into unexpected error- 
+            Message: ${unexpectedError.message}`);
 
-        let customError = new OpenT2TError(err.statusCode, customMessage, err);
-        this.ConsoleLogger.verbose(`custom error message: ${customError.message}`);
-        this.ConsoleLogger.verbose(`custom error name: ${customError.name}`);
-        this.ConsoleLogger.verbose(`custom error statusCode: ${customError.statusCode}`);
-        this.ConsoleLogger.verbose(`custom error innerError message: ${customError.innerError.message}`);
-        this.ConsoleLogger.verbose(`custom error innerError stack:  ${customError.innerError.stack}`);
-
-        return q.reject(customError);
+            return q.reject(unexpectedError);
+        }
     }
 }
 
