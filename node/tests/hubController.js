@@ -142,6 +142,20 @@ test.serial('translatePlatformsInvalidHmac', async t => {
    t.is(error.innerError.message, OpenT2TConstants.HMacSignatureVerificationFailed);
 });
 
+test.serial('subscribeDeviceGraphUpdate', async t => {
+    var subscription = await hubController.subscribeDeviceGraph(config.hubId, authInfo, config.subscriptionInfo);
+    console.log(JSON.stringify(subscription, null, 2));
+    t.truthy(subscription);
+    t.truthy(subscription.expiration);
+});
+
+test.serial('translateDeviceGraphUpdate', async t => {
+    var actualAllPlatforms = await hubController.platforms(config.hubId, authInfo);
+    var translatedAllPlatforms = await hubController.translatePlatforms(config.hubId, authInfo, { objects: [] });
+    
+    t.deepEqual(translatedAllPlatforms, actualAllPlatforms);
+});
+
 test.serial('InvalidHubIdThrowsForAnyAPI', async t => {
     const error = await t.throws(hubController.onboard("NonExistentHub", onboardingConfig.onboardingInfo));
     t.is(error.name, "OpenT2TError");
