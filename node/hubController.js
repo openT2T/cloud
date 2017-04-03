@@ -12,8 +12,9 @@ class HubController {
 
     constructor(logLevel = "info") {
         this.supportedHubsCache = undefined;
-        this.OpenT2T = require('opent2t').OpenT2T;
-        this.ConsoleLogger = new OpenT2TLogger(logLevel);
+        let opent2t = require('opent2t').OpenT2T;
+        this.logger = new OpenT2TLogger(logLevel);
+        this.OpenT2T = new opent2t(this.logger);
     }
 
     /** 
@@ -42,13 +43,13 @@ class HubController {
         }
 
         if (i === undefined) {
-            this.ConsoleLogger.verbose("supportedHubs()");
+            this.logger.verbose("supportedHubs()");
             i = 0;
         }
 
         // load info for the current hub
         var hubInfo = hubs[i];
-        this.ConsoleLogger.verbose("i: " + i);
+        this.logger.verbose("i: " + i);
         
         var LocalPackageSourceClass = require('opent2t/package/LocalPackageSource').LocalPackageSource;
         var localPackageSource = new LocalPackageSourceClass("./node_modules/" + hubInfo.translator);
@@ -60,7 +61,7 @@ class HubController {
             if (p.translators.length > 0) {
 
                 var tinfo = p.translators[0];
-                this.ConsoleLogger.verbose("Package info: ", tinfo);
+                this.logger.verbose("Package info: ", tinfo);
                 hubInfo.onboarding = tinfo.onboarding;
                 hubInfo.onboardingFlow = tinfo.onboardingFlow;
             }
@@ -83,7 +84,7 @@ class HubController {
      * given a specific hub info, does the onboarding given the onboardingInfo and returns the auth info
      */
     onboard(hubId, onboardingInfo) {
-        this.ConsoleLogger.verbose("onboard()");
+        this.logger.verbose("onboard()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             // do the onboarding and return token
             var Onboarding = require(hubInfo.onboarding);
@@ -100,7 +101,7 @@ class HubController {
      * auth info object back.
      */
     refreshAuthToken(hubId, onboardingInfo, existingAuthInfo){
-        this.ConsoleLogger.verbose("refreshAuthToken()");
+        this.logger.verbose("refreshAuthToken()");
 
         return this._getHubInfo(hubId).then((hubInfo) => {
 
@@ -119,7 +120,7 @@ class HubController {
      * given the specific hub id, returns all the platforms which are connected to it
      */
     platforms(hubId, authInfo) {
-        this.ConsoleLogger.verbose("platforms()");
+        this.logger.verbose("platforms()");
         // will return hub getPlatform contents
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
@@ -135,7 +136,7 @@ class HubController {
      * given the specific hub id and opent2tblob, returns the specific platform
      */
     getPlatform(hubId, authInfo, opent2tBlob) {
-        this.ConsoleLogger.verbose("getPlatform()");
+        this.logger.verbose("getPlatform()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // platform get
@@ -154,7 +155,7 @@ class HubController {
      * given the specific hub id, opent2tblob, and resourceId, sets it with the given resourceBlob
      */
     setResource(hubId, authInfo, opent2tBlob, deviceId, resoureceId, resourceBlob) {
-        this.ConsoleLogger.verbose("setResource()");
+        this.logger.verbose("setResource()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 // resource set
@@ -176,7 +177,7 @@ class HubController {
      * Subscribe to notifications for device graph updates (add/remove devices from a provider)
      */
     subscribeDeviceGraph(hubId, authInfo, subscriptionInfo) {
-        this.ConsoleLogger.verbose("subscribeDeviceGraph()");
+        this.logger.verbose("subscribeDeviceGraph()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
                 return hubInstance.postSubscribe(subscriptionInfo);
@@ -189,7 +190,7 @@ class HubController {
      * the subscriptionInfo.callbackURL.
      */
     subscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo) {
-        this.ConsoleLogger.verbose("subscribePlatform()");
+        this.logger.verbose("subscribePlatform()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
@@ -211,7 +212,7 @@ class HubController {
      * Unsubscribe notification on all resources from a platform.
      */
     unsubscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo) {
-        this.ConsoleLogger.verbose("unsubscribePlatform()");
+        this.logger.verbose("unsubscribePlatform()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
@@ -233,7 +234,7 @@ class HubController {
      * Verification step for cloud notifications for providers that require it.
      */
     subscribeVerify(hubId, authInfo, verificationBlob) {
-        this.ConsoleLogger.verbose("subscribeVerify()");
+        this.logger.verbose("subscribeVerify()");
         return this._getHubInfo(hubId).then((hubInfo) => {
             return this._createTranslator(hubInfo.translator, authInfo).then((hubInstance) => {
 
@@ -257,7 +258,7 @@ class HubController {
      * @param {Object} verificationInfo.header - Headers from the notification which will contain a provider specific HMAC.
      */
     translatePlatforms(hubId, authInfo, providerBlob, verificationInfo) {
-        this.ConsoleLogger.verbose("translatePlatforms()");
+        this.logger.verbose("translatePlatforms()");
         
         // Create a hub, of the requested type.
         return this._getHubInfo(hubId).then((hubInfo) => {
@@ -276,7 +277,7 @@ class HubController {
      * helper methods
      */
     _getHubInfo(hubId) {
-        this.ConsoleLogger.verbose("_getHubInfo()");
+        this.logger.verbose("_getHubInfo()");
         return this.supportedHubs().then((hubs) => {
             // find the hub referenced by hubId
             var hubInfo = undefined;
@@ -290,7 +291,7 @@ class HubController {
             }
 
             if (!hubInfo) {
-                this.ConsoleLogger.error("invalid hub id");
+                this.logger.error("invalid hub id");
                 throw new OpenT2TError(404, OpenT2TConstants.InvalidHubId);
             }
 
@@ -299,7 +300,7 @@ class HubController {
     }
 
     _invokeMethod(translator, deviceInfo, methodName, params) {
-        this.ConsoleLogger.info(
+        this.logger.info(
             `_invokeMethod ${methodName} with params ${JSON.stringify(params, null, 2)}`);
 
         if (typeof translator === "object") {
@@ -313,7 +314,7 @@ class HubController {
     }
     
     _setProperty(translatorName, deviceInfo, property, deviceId, value) {
-        this.ConsoleLogger.info(
+        this.logger.info(
             `_setProperty ${translatorName} for ${property} to ${JSON.stringify(value, null, 2)}`);
 
         return this._createTranslator(translatorName, deviceInfo).then(translator => {
@@ -326,7 +327,7 @@ class HubController {
     }
 
     _createTranslator(translatorName, deviceInfo) {
-        this.ConsoleLogger.info(`_createTranslator ${translatorName}`);
+        this.logger.info(`_createTranslator ${translatorName}`);
         return this.OpenT2T.createTranslatorAsync(translatorName, deviceInfo).then( translator => {
             return translator;
         }); 
@@ -358,14 +359,14 @@ class HubController {
             }
 
             let customError = new OpenT2TError(customErrCode, customMessage, innerError);
-            this.ConsoleLogger.error(`Returning error from hubController- 
+            this.logger.error(`Returning error from hubController- 
             Message: ${customError.message}; StatusCode: ${customError.statusCode}`);
 
             return q.reject(customError);
         }
         catch(unexpectedErr) {
             let unexpectedError = new OpenT2TError(customErrCode, customMessage, unexpectedErr);
-            this.ConsoleLogger.error(`ErrorHandler in hubController ran into unexpected error- 
+            this.logger.error(`ErrorHandler in hubController ran into unexpected error- 
             Message: ${unexpectedError.message}`);
 
             return q.reject(unexpectedError);

@@ -2,7 +2,8 @@ var q = require('q');
 var express = require('express');
 var hubRouter = express.Router();
 var config = require("./config");
-var OpenT2T = require("opent2t").OpenT2T;
+var opent2t = require("opent2t").OpenT2T;
+var OpenT2T = new opent2t();
 
 // **** THIS IS FOR TESTING PURPOSES ONLY, SHOULD BE HANDLED BY OPENT2T LIBRARY
 var translatorPath = require('path').join(__dirname, '..', 'temp', 'translators', 'org.opent2t.sample.thermostat.superpopular', 'com.wink.thermostat', 'js');
