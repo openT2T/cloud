@@ -2,8 +2,8 @@ var q = require('q');
 var express = require('express');
 var hubRouter = express.Router();
 var config = require("./config");
-var opent2t = require("opent2t").OpenT2T;
-var OpenT2T = new opent2t();
+var OpenT2T = require("opent2t").OpenT2T;
+var opent2t = new OpenT2T();
 
 // **** THIS IS FOR TESTING PURPOSES ONLY, SHOULD BE HANDLED BY OPENT2T LIBRARY
 var translatorPath = require('path').join(__dirname, '..', 'temp', 'translators', 'org.opent2t.sample.thermostat.superpopular', 'com.wink.thermostat', 'js');
@@ -151,7 +151,7 @@ function createOpent2tDevice(user, device, hubId) {
             }
     }; 
 
-    return OpenT2T.createTranslatorAsync(translatorPath, 'thingTranslator', d).then(translator => {
+    return opent2t.createTranslatorAsync(translatorPath, 'thingTranslator', d).then(translator => {
         // save the internal device to cache
         var internalDevice = config.addUserDeviceToDevice(user, device, hubId);
         // save the translator in our internal device
@@ -187,7 +187,7 @@ hubRouter.get("/:hubId/devices/:deviceId", function (req, res) {
     var getUri = getGetUriFromSchema(schema);
 
     // invoke the translator to get information
-    OpenT2T.invokeMethodAsync(device.translator, schema, getUri, []).then((response) => {
+    opent2t.invokeMethodAsync(device.translator, schema, getUri, []).then((response) => {
         converted.state = response;
         console.log(converted);
         res.send(converted);
@@ -220,7 +220,7 @@ hubRouter.post("/:hubId/devices/:deviceId", function (req, res) {
     var postUri = getPostUriFromSchema(schema);
 
     // invoke the translator to set information
-    OpenT2T.invokeMethodAsync(device.translator, schema, postUri, [value]).then((response) => {
+    opent2t.invokeMethodAsync(device.translator, schema, postUri, [value]).then((response) => {
             // after successful call, return the latest state to the user
             converted.state = response;
             console.log(converted);

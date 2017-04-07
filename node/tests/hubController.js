@@ -2,6 +2,8 @@ const sleep = require('es6-sleep').promise;
 var test = require('ava');
 var config = require('./hubController-testConfig');
 var OpenT2TConstants = require('opent2t').OpenT2TConstants;
+var OpenT2TLogger = require('opent2t').Logger;
+var logger = new OpenT2TLogger("verbose");
 
 // Separate out authorization info to avoid accidentally commiting passwords and keys
 // File must contain onboarding info for the hub:
@@ -20,12 +22,12 @@ var OpenT2TConstants = require('opent2t').OpenT2TConstants;
 var onboardingConfig = require('./hubController-testConfig-auth.json');
 
 var HubController = require("../hubController");
-var hubController = new HubController("verbose");
+var hubController = new HubController();
 var authInfo = undefined;
 
 // setup the translator before all the tests run
 test.before(async () => {
-    authInfo = await hubController.onboard(config.hubId, onboardingConfig.onboardingInfo);
+    authInfo = await hubController.onboard(config.hubId, onboardingConfig.onboardingInfo, logger);
 });
 
 test.serial("Valid Hub Controller", t => {
@@ -38,7 +40,7 @@ test.serial("Valid Hub Controller", t => {
 
 test.serial("RefreshAuthToken returns a valid non-error response", async t => {
     var oldAccessToken = authInfo['access'].token;
-    var refreshedAuthInfo = await hubController.refreshAuthToken(config.hubId, onboardingConfig.onboardingInfo, authInfo);
+    var refreshedAuthInfo = await hubController.refreshAuthToken(config.hubId, onboardingConfig.onboardingInfo, authInfo, logger);
     console.log("********New Auth Info***********");
     console.log(JSON.stringify(refreshedAuthInfo));
     console.log("*******************");
@@ -47,7 +49,7 @@ test.serial("RefreshAuthToken returns a valid non-error response", async t => {
 });
 
 test.serial('SupportedHubs', async t => {
-    var supportedHubs = await hubController.supportedHubs();
+    var supportedHubs = await hubController.supportedHubs(logger);
     console.log("*******************");
     console.log(JSON.stringify(supportedHubs, null, 2));
     console.log("*******************");
@@ -57,14 +59,14 @@ test.serial('SupportedHubs', async t => {
 });
 
 test.serial('GetPlatforms', async t => {
-    var platforms = await hubController.platforms(config.hubId, authInfo);
+    var platforms = await hubController.platforms(config.hubId, authInfo, logger);
     console.log(JSON.stringify(platforms, null, 2));
     t.truthy(platforms);
     t.is(platforms.platforms.length > 0, true);
 });
 
 test.serial('getPlatform', async t => {
-    var platform = await hubController.getPlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob);
+    var platform = await hubController.getPlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, logger);
     t.truthy(platform);
     t.truthy(platform.entities);
     t.truthy(platform.entities[0]);
@@ -73,14 +75,14 @@ test.serial('getPlatform', async t => {
 
 test.serial('subscribePlatform', async t => {
     // Subscribe the the platform specified in the test config
-    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    var subscription = await hubController.subscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo, logger);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.truthy(subscription.expiration);
 });
 
 test.serial('unsubscribePlatform', async t => {
-    var subscription = await hubController.unsubscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo);
+    var subscription = await hubController.unsubscribePlatform(config.hubId, authInfo, config.getPlatform.opent2tBlob, config.subscriptionInfo, logger);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.is(subscription.expiration, 0);
@@ -95,7 +97,7 @@ test.serial('subscribeVerify', async t => {
         "&hub.lease_seconds=" + config.subscription.expiration +
         "&hub.mode=subscribe";
     
-    var subscription = await hubController.subscribeVerify(config.hubId, authInfo, verificationRequest); 
+    var subscription = await hubController.subscribeVerify(config.hubId, authInfo, verificationRequest, logger); 
 
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
@@ -116,7 +118,7 @@ test.serial('translatePlatforms', async t => {
     };
 
     var translatedFeed = await hubController.translatePlatforms(
-        config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo);
+        config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo, logger);
     console.log(JSON.stringify(translatedFeed, null, 2));
     t.truthy(translatedFeed);
     t.truthy(translatedFeed.platforms);    
@@ -136,35 +138,35 @@ test.serial('translatePlatformsInvalidHmac', async t => {
     }; 
  
    // Verify that no platforms are translated as the signatures did not match. 
-   const error = await t.throws(hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo)); 
+   const error = await t.throws(hubController.translatePlatforms(config.hubId, authInfo, config.subscription.sampleFeed, verificationInfo, logger)); 
    t.is(error.name, "OpenT2TError");
    t.is(error.statusCode, 401);
    t.is(error.innerError.message, OpenT2TConstants.HMacSignatureVerificationFailed);
 });
 
 test.serial('subscribeDeviceGraphUpdate', async t => {
-    var subscription = await hubController.subscribeDeviceGraph(config.hubId, authInfo, config.subscriptionInfo);
+    var subscription = await hubController.subscribeDeviceGraph(config.hubId, authInfo, config.subscriptionInfo, logger);
     console.log(JSON.stringify(subscription, null, 2));
     t.truthy(subscription);
     t.truthy(subscription.expiration);
 });
 
 test.serial('translateDeviceGraphUpdate', async t => {
-    var actualAllPlatforms = await hubController.platforms(config.hubId, authInfo);
-    var translatedAllPlatforms = await hubController.translatePlatforms(config.hubId, authInfo, { objects: [] });
+    var actualAllPlatforms = await hubController.platforms(config.hubId, authInfo, logger);
+    var translatedAllPlatforms = await hubController.translatePlatforms(config.hubId, authInfo, { objects: [] }, undefined, logger);
     
     t.deepEqual(translatedAllPlatforms, actualAllPlatforms);
 });
 
 test.serial('InvalidHubIdThrowsForAnyAPI', async t => {
-    const error = await t.throws(hubController.onboard("NonExistentHub", onboardingConfig.onboardingInfo));
+    const error = await t.throws(hubController.onboard("NonExistentHub", onboardingConfig.onboardingInfo, logger));
     t.is(error.name, "OpenT2TError");
     t.is(error.statusCode, 404);
     t.is(error.innerError.message, OpenT2TConstants.InvalidHubId);
 });
 
 test.serial('UndefinedOnboardingInfoForRefreshAuthTokenThrows', async t => {
-    const error = await t.throws(hubController.refreshAuthToken(config.hubId, "undefined", authInfo));
+    const error = await t.throws(hubController.refreshAuthToken(config.hubId, "undefined", authInfo, logger));
     t.is(error.name, "OpenT2TError");
     t.is(error.statusCode, 401);
     t.is(error.innerError.message, OpenT2TConstants.InvalidAuthInfoInput);
@@ -172,18 +174,18 @@ test.serial('UndefinedOnboardingInfoForRefreshAuthTokenThrows', async t => {
 
 test.serial('InvalidOnboardingInfoForRefreshAuthTokenThrows', async t =>{
     var invalidOnboardingConfig = require('./hubController-testConfig-Invalidauth.json');
-    const error = await t.throws(hubController.refreshAuthToken(config.hubId, invalidOnboardingConfig.onboardingInfo, authInfo));
+    const error = await t.throws(hubController.refreshAuthToken(config.hubId, invalidOnboardingConfig.onboardingInfo, authInfo, logger));
     t.is(error.name, "OpenT2TError");
     t.is(error.statusCode, 401);
     t.is(error.innerError.message, OpenT2TConstants.InvalidAuthInfoInput);
 });
 
 test.serial('Unknown platform', async t => {
-    const translation = await hubController.translatePlatforms(config.hubId, authInfo, config.translation.unknownplatform);
+    const translation = await hubController.translatePlatforms(config.hubId, authInfo, config.subscription.translation.unknownplatform, undefined, logger);
     t.is(translation.platforms.length, 0);
     t.is(translation.errors.length, 1);
     t.is(translation.errors[0].name, 'OpenT2TError');
     t.is(translation.errors[0].statusCode, 404);
     t.true(translation.errors[0].message.startsWith(OpenT2TConstants.UnknownPlatform));
-    t.true(translation.errors[0].message.endsWith(config.translation.unknownplatform.model_name));
+    t.true(translation.errors[0].message.endsWith(config.subscription.translation.unknownplatform.model_name));
 });
