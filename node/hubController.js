@@ -303,7 +303,6 @@ class HubController {
             }
 
             if (!hubInfo) {
-                logger.error("invalid hub id");
                 throw new OpenT2TError(404, OpenT2TConstants.InvalidHubId);
             }
 
