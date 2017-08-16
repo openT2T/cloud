@@ -116,7 +116,7 @@ class HubController {
 
     /**
      * Given a specific hub info, onboardingInfo, and existing authInfo blob,
-     * deauthorize the OAuthToken refresh.
+     * deauthorize the OAuthToken.
      */
     deauthorizeToken(hubId, onboardingInfo, existingAuthInfo, logger){
         logger.verbose("deauthorizeToken()");
