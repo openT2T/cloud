@@ -1,6 +1,6 @@
 {
   "name": "opent2t-cloud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Helper classes and interface to manage opent2t cloud components. For now only the hubController management class",
   "main": "hubController.js",
   "files": [
