@@ -80,7 +80,7 @@ class HubController {
     /**
      * given a specific hub info, does the onboarding given the onboardingInfo and returns the auth info
      */
-    onboard(hubId, onboardingInfo, logger) {
+    onboard(hubId, onboardingInfo, logger, flightInfo) {
         logger.verbose("onboard()");
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             // do the onboarding and return token
@@ -97,7 +97,7 @@ class HubController {
      *  does the OAuthToken refresh, and returns the refreshed
      * auth info object back.
      */
-    refreshAuthToken(hubId, onboardingInfo, existingAuthInfo, logger){
+    refreshAuthToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo){
         logger.verbose("refreshAuthToken()");
 
         let opent2t = new OpenT2T(logger);
@@ -117,7 +117,7 @@ class HubController {
     /**
      * given the specific hub id, returns all the platforms which are connected to it
      */
-    platforms(hubId, authInfo, logger) {
+    platforms(hubId, authInfo, logger, flightInfo) {
         logger.verbose("platforms()");
 
         // will return hub getPlatform contents
@@ -135,7 +135,7 @@ class HubController {
     /**
      * given the specific hub id and opent2tblob, returns the specific platform
      */
-    getPlatform(hubId, authInfo, opent2tBlob, logger) {
+    getPlatform(hubId, authInfo, opent2tBlob, logger, flightInfo) {
         logger.verbose("getPlatform()");
         let opent2t = new OpenT2T(logger);
 
@@ -156,7 +156,7 @@ class HubController {
     /**
      * given the specific hub id, opent2tblob, and resourceId, sets it with the given resourceBlob
      */
-    setResource(hubId, authInfo, opent2tBlob, deviceId, resoureceId, resourceBlob, logger) {
+    setResource(hubId, authInfo, opent2tBlob, deviceId, resoureceId, resourceBlob, logger, flightInfo) {
         logger.verbose("setResource()");
         let opent2t = new OpenT2T(logger);
 
@@ -180,7 +180,7 @@ class HubController {
     /**
      * Subscribe to notifications for device graph updates (add/remove devices from a provider)
      */
-    subscribeDeviceGraph(hubId, authInfo, subscriptionInfo, logger) {
+    subscribeDeviceGraph(hubId, authInfo, subscriptionInfo, logger, flightInfo) {
         logger.verbose("subscribeDeviceGraph()");
         let opent2t = new OpenT2T(logger);
 
@@ -195,7 +195,7 @@ class HubController {
      * Subscribe for notifications on all resources composing a platform.  Notifications will be posted to to
      * the subscriptionInfo.callbackURL.
      */
-    subscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo, logger) {
+    subscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo, logger, flightInfo) {
         logger.verbose("subscribePlatform()");
         let opent2t = new OpenT2T(logger);
 
@@ -219,7 +219,7 @@ class HubController {
     /** 
      * Unsubscribe notification on all resources from a platform.
      */
-    unsubscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo, logger) {
+    unsubscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo, logger, flightInfo) {
         logger.verbose("unsubscribePlatform()");
         let opent2t = new OpenT2T(logger);
 
@@ -243,7 +243,7 @@ class HubController {
     /**
      * Verification step for cloud notifications for providers that require it.
      */
-    subscribeVerify(hubId, authInfo, verificationBlob, logger) {
+    subscribeVerify(hubId, authInfo, verificationBlob, logger, flightInfo) {
         logger.verbose("subscribeVerify()");
         let opent2t = new OpenT2T(logger);
 
@@ -269,7 +269,7 @@ class HubController {
      * @param {string} verificationInfo.key - Secret key used to compute HMAC
      * @param {Object} verificationInfo.header - Headers from the notification which will contain a provider specific HMAC.
      */
-    translatePlatforms(hubId, authInfo, providerBlob, verificationInfo, logger) {
+    translatePlatforms(hubId, authInfo, providerBlob, verificationInfo, logger, flightInfo) {
         logger.verbose("translatePlatforms()");
         let opent2t = new OpenT2T(logger);
         
