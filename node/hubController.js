@@ -82,6 +82,11 @@ class HubController {
      */
     onboard(hubId, onboardingInfo, logger, flightInfo) {
         logger.verbose("onboard()");
+
+        if (onboardingInfo) {
+            onboardingInfo.flights = flightInfo;
+        }
+
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             // do the onboarding and return token
             var Onboarding = require(hubInfo.onboarding);
@@ -99,8 +104,12 @@ class HubController {
      */
     refreshAuthToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo){
         logger.verbose("refreshAuthToken()");
-
         let opent2t = new OpenT2T(logger);
+
+        if (onboardingInfo) {
+            onboardingInfo.flights = flightInfo;
+        }
+
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
 
             // create hub translator for given hubId
@@ -120,6 +129,10 @@ class HubController {
     platforms(hubId, authInfo, logger, flightInfo) {
         logger.verbose("platforms()");
 
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
+
         // will return hub getPlatform contents
         let opent2t = new OpenT2T(logger);
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -138,6 +151,10 @@ class HubController {
     getPlatform(hubId, authInfo, opent2tBlob, logger, flightInfo) {
         logger.verbose("getPlatform()");
         let opent2t = new OpenT2T(logger);
+
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
@@ -159,6 +176,10 @@ class HubController {
     setResource(hubId, authInfo, opent2tBlob, deviceId, resoureceId, resourceBlob, logger, flightInfo) {
         logger.verbose("setResource()");
         let opent2t = new OpenT2T(logger);
+
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
@@ -183,7 +204,11 @@ class HubController {
     subscribeDeviceGraph(hubId, authInfo, subscriptionInfo, logger, flightInfo) {
         logger.verbose("subscribeDeviceGraph()");
         let opent2t = new OpenT2T(logger);
-
+        
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
+        
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
                 return hubInstance.postSubscribe(subscriptionInfo);
@@ -198,6 +223,10 @@ class HubController {
     subscribePlatform(hubId, authInfo, opent2tBlob, subscriptionInfo, logger, flightInfo) {
         logger.verbose("subscribePlatform()");
         let opent2t = new OpenT2T(logger);
+
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
@@ -223,6 +252,10 @@ class HubController {
         logger.verbose("unsubscribePlatform()");
         let opent2t = new OpenT2T(logger);
 
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
+
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
 
@@ -246,6 +279,10 @@ class HubController {
     subscribeVerify(hubId, authInfo, verificationBlob, logger, flightInfo) {
         logger.verbose("subscribeVerify()");
         let opent2t = new OpenT2T(logger);
+
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
@@ -272,6 +309,10 @@ class HubController {
     translatePlatforms(hubId, authInfo, providerBlob, verificationInfo, logger, flightInfo) {
         logger.verbose("translatePlatforms()");
         let opent2t = new OpenT2T(logger);
+        
+        if (authInfo) {
+            authInfo.flights = flightInfo;
+        }
         
         // Create a hub, of the requested type.
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
