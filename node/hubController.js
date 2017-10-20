@@ -123,6 +123,31 @@ class HubController {
     }
 
     /**
+     * Given a specific hub info, onboardingInfo, and existing authInfo blob,
+     * deauthorize the OAuthToken.
+     */
+    deauthorizeToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo){
+        logger.verbose("deauthorizeToken()");
+
+        if (onboardingInfo) {
+            onboardingInfo.flights = _getFlights(flightInfo);
+        }
+
+        let opent2t = new OpenT2T(logger);
+        return this._getHubInfo(hubId, logger).then((hubInfo) => {
+
+            // create hub translator for given hubId
+            return this._createTranslator(opent2t, hubInfo.translator, existingAuthInfo).then((hubInstance) => {
+                
+                // hub deauthorizeToken
+                return this._invokeMethod(opent2t, hubInstance, "", "deauthorizeToken", [onboardingInfo]);
+            });
+        }).catch((err) => {
+            return this._handleError(err, "deauthorizeToken", logger);
+        });
+    }
+
+    /**
      * given the specific hub id, returns all the platforms which are connected to it
      */
     platforms(hubId, authInfo, logger, flightInfo) {
