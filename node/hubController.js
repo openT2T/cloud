@@ -47,7 +47,6 @@ class HubController {
         // load info for the current hub
         var hubInfo = hubs[i];
         logger.verbose("i: " + i);
-
         var LocalPackageSourceClass = require('opent2t/package/LocalPackageSource').LocalPackageSource;
         var localPackageSource = new LocalPackageSourceClass("./node_modules/" + hubInfo.translator);
 
@@ -332,12 +331,8 @@ class HubController {
      */
 
     /**
-     * Returns an array of strings
-     *  If flightInfo is a string list (expected) "a,b" = ["a", "b"]
-     *  If flightInfo is a primitive true = ["true"]
-     *  If flight info is an type array [1, "b", null, undefined, [4, 5]] = ["1", "b", "4", "5"]
-     *  If flight info is undefined = []
-     *  If flight info is null = []
+     * Returns an array of strings, expected input is string:
+     *  "flight1,flight2"
      */
     _getFlights(flightInfo) {
         return (flightInfo === undefined || flightInfo === null) ? [] :
