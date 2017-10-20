@@ -47,7 +47,7 @@ class HubController {
         // load info for the current hub
         var hubInfo = hubs[i];
         logger.verbose("i: " + i);
-        
+
         var LocalPackageSourceClass = require('opent2t/package/LocalPackageSource').LocalPackageSource;
         var localPackageSource = new LocalPackageSourceClass("./node_modules/" + hubInfo.translator);
 
@@ -84,7 +84,7 @@ class HubController {
         logger.verbose("onboard()");
 
         if (onboardingInfo) {
-            onboardingInfo.flights = flightInfo;
+            onboardingInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -102,19 +102,19 @@ class HubController {
      *  does the OAuthToken refresh, and returns the refreshed
      * auth info object back.
      */
-    refreshAuthToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo){
+    refreshAuthToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo) {
         logger.verbose("refreshAuthToken()");
         let opent2t = new OpenT2T(logger);
 
         if (onboardingInfo) {
-            onboardingInfo.flights = flightInfo;
+            onboardingInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
 
             // create hub translator for given hubId
             return this._createTranslator(opent2t, hubInfo.translator, existingAuthInfo).then((hubInstance) => {
-                
+
                 // hub refreshAuthToken
                 return this._invokeMethod(opent2t, hubInstance, "", "refreshAuthToken", [onboardingInfo]);
             });
@@ -130,7 +130,7 @@ class HubController {
         logger.verbose("platforms()");
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         // will return hub getPlatform contents
@@ -153,7 +153,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -166,7 +166,7 @@ class HubController {
                 return this._invokeMethod(opent2t, opent2tBlob.translator, deviceInfo, "get", [true]);
             });
         }).catch((err) => {
-           return this._handleError(err, "getPlatform", logger);
+            return this._handleError(err, "getPlatform", logger);
         });
     }
 
@@ -178,7 +178,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -204,11 +204,11 @@ class HubController {
     subscribeDeviceGraph(hubId, authInfo, subscriptionInfo, logger, flightInfo) {
         logger.verbose("subscribeDeviceGraph()");
         let opent2t = new OpenT2T(logger);
-        
+
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
-        
+
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             return this._createTranslator(opent2t, hubInfo.translator, authInfo).then((hubInstance) => {
                 return hubInstance.postSubscribe(subscriptionInfo);
@@ -225,7 +225,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -234,7 +234,7 @@ class HubController {
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
-                deviceInfo.deviceInfo.opent2t = opent2tBlob; 
+                deviceInfo.deviceInfo.opent2t = opent2tBlob;
 
                 return this._createTranslator(opent2t, opent2tBlob.translator, deviceInfo).then(translator => {
                     return opent2t.invokeMethodAsync(translator, "", "postSubscribe", [subscriptionInfo]);
@@ -253,7 +253,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -262,7 +262,7 @@ class HubController {
                 var deviceInfo = {};
                 deviceInfo.hub = hubInstance;
                 deviceInfo.deviceInfo = {};
-                deviceInfo.deviceInfo.opent2t = opent2tBlob; 
+                deviceInfo.deviceInfo.opent2t = opent2tBlob;
 
                 return this._createTranslator(opent2t, opent2tBlob.translator, deviceInfo).then(translator => {
                     return opent2t.invokeMethodAsync(translator, "", "deleteSubscribe", [subscriptionInfo]);
@@ -272,7 +272,7 @@ class HubController {
             return this._handleError(err, "unsubscribePlatform", logger);
         });
     }
-    
+
     /**
      * Verification step for cloud notifications for providers that require it.
      */
@@ -281,7 +281,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -309,11 +309,11 @@ class HubController {
     translatePlatforms(hubId, authInfo, providerBlob, verificationInfo, logger, flightInfo) {
         logger.verbose("translatePlatforms()");
         let opent2t = new OpenT2T(logger);
-        
+
         if (authInfo) {
-            authInfo.flights = flightInfo;
+            authInfo.flights = _getFlights(flightInfo);
         }
-        
+
         // Create a hub, of the requested type.
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
             // Pass the provider blob off to the hub for translation.
@@ -330,6 +330,20 @@ class HubController {
     /**
      * helper methods
      */
+
+    /**
+     * Returns an array of strings
+     *  If flightInfo is a string list (expected) "a,b" = ["a", "b"]
+     *  If flightInfo is a primitive true = ["true"]
+     *  If flight info is an type array [1, "b", null, undefined, [4, 5]] = ["1", "b", "4", "5"]
+     *  If flight info is undefined = []
+     *  If flight info is null = []
+     */
+    _getFlights(flightInfo) {
+        return (flightInfo === undefined || flightInfo === null) ? [] :
+            flightInfo.toString().split(",").filter(n => n.length > 0);
+    }
+
     _getHubInfo(hubId, logger) {
         return this.supportedHubs(logger).then((hubs) => {
             // find the hub referenced by hubId
@@ -354,32 +368,32 @@ class HubController {
     _invokeMethod(opent2t, translator, deviceInfo, methodName, params) {
         if (typeof translator === "object") {
             return opent2t.invokeMethodAsync(translator, "", methodName, params);
-        } 
+        }
         else {
             return this._createTranslator(opent2t, translator, deviceInfo).then(translatorInstance => {
                 return opent2t.invokeMethodAsync(translatorInstance, "", methodName, params);
             });
         }
     }
-    
+
     _setProperty(opent2t, translatorName, deviceInfo, property, deviceId, value) {
         return this._createTranslator(opent2t, translatorName, deviceInfo).then(translator => {
             return opent2t.invokeMethodAsync(translator, "", property, [deviceId, value]);
         });
     }
-    
+
     _capitalizeFirstLetter(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     _createTranslator(opent2t, translatorName, deviceInfo) {
-        return opent2t.createTranslatorAsync(translatorName, deviceInfo).then( translator => {
+        return opent2t.createTranslatorAsync(translatorName, deviceInfo).then(translator => {
             return translator;
-        }); 
+        });
     }
 
     _handleError(err, message, logger) {
-        let customMessage = `OpenT2T call failed in: ${message}; Original message: `; 
+        let customMessage = `OpenT2T call failed in: ${message}; Original message: `;
         let customErrCode = 500;
         let innerError = undefined;
 
@@ -392,7 +406,7 @@ class HubController {
                 // Can also check err.Name
                 if ('response' in err && 'statusMessage' in err.response) {
                     customMessage = customMessage + err.response.statusMessage;
-                }   
+                }
                 else {
                     // Likely a simple Error-derived class like OpenT2TError
                     customMessage = customMessage + err.message;
@@ -409,7 +423,7 @@ class HubController {
 
             return q.reject(customError);
         }
-        catch(unexpectedErr) {
+        catch (unexpectedErr) {
             let unexpectedError = new OpenT2TError(customErrCode, customMessage, unexpectedErr);
             logger.error(`ErrorHandler in hubController ran into unexpected error- 
             Message: ${unexpectedError.message}`);
