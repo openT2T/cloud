@@ -331,11 +331,11 @@ class HubController {
      */
 
     /**
-     * Returns an array of strings, expected input is string:
-     *  "flight1,flight2"
+     * Returns an array of flights or null
+     * expected input is string: "flight1,flight2"
      */
     _getFlights(flightInfo) {
-        return (flightInfo === undefined || flightInfo === null) ? [] :
+        return (flightInfo === undefined || flightInfo === null) ? null :
             flightInfo.toString().split(",").filter(n => n.length > 0);
     }
 
