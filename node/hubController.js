@@ -83,7 +83,7 @@ class HubController {
         logger.verbose("onboard()");
 
         if (onboardingInfo) {
-            onboardingInfo.flights = _getFlights(flightInfo);
+            onboardingInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -106,7 +106,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (onboardingInfo) {
-            onboardingInfo.flights = _getFlights(flightInfo);
+            onboardingInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -130,7 +130,7 @@ class HubController {
         logger.verbose("deauthorizeToken()");
 
         if (onboardingInfo) {
-            onboardingInfo.flights = _getFlights(flightInfo);
+            onboardingInfo.flights = this._getFlights(flightInfo);
         }
 
         let opent2t = new OpenT2T(logger);
@@ -154,7 +154,7 @@ class HubController {
         logger.verbose("platforms()");
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         // will return hub getPlatform contents
@@ -177,7 +177,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -202,7 +202,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -230,7 +230,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -249,7 +249,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -277,7 +277,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -305,7 +305,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -335,7 +335,7 @@ class HubController {
         let opent2t = new OpenT2T(logger);
 
         if (authInfo) {
-            authInfo.flights = _getFlights(flightInfo);
+            authInfo.flights = this._getFlights(flightInfo);
         }
 
         // Create a hub, of the requested type.
