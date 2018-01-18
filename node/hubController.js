@@ -105,8 +105,8 @@ class HubController {
         logger.verbose("refreshAuthToken()");
         let opent2t = new OpenT2T(logger);
 
-        if (onboardingInfo) {
-            onboardingInfo.flights = this._getFlights(flightInfo);
+        if (existingAuthInfo) {
+            existingAuthInfo.flights = this._getFlights(flightInfo);
         }
 
         return this._getHubInfo(hubId, logger).then((hubInfo) => {
@@ -126,11 +126,11 @@ class HubController {
      * Given a specific hub info, onboardingInfo, and existing authInfo blob,
      * deauthorize the OAuthToken.
      */
-    deauthorizeToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo){
+    deauthorizeToken(hubId, onboardingInfo, existingAuthInfo, logger, flightInfo) {
         logger.verbose("deauthorizeToken()");
 
-        if (onboardingInfo) {
-            onboardingInfo.flights = this._getFlights(flightInfo);
+        if (existingAuthInfo) {
+            existingAuthInfo.flights = this._getFlights(flightInfo);
         }
 
         let opent2t = new OpenT2T(logger);
@@ -138,7 +138,7 @@ class HubController {
 
             // create hub translator for given hubId
             return this._createTranslator(opent2t, hubInfo.translator, existingAuthInfo).then((hubInstance) => {
-                
+
                 // hub deauthorizeToken
                 return this._invokeMethod(opent2t, hubInstance, "", "deauthorizeToken", [onboardingInfo]);
             });
